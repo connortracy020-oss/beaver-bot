@@ -1,0 +1,27 @@
+# Beaver Bot settings for one computer.
+# Copy this file to beaverbot.local.toml (which is gitignored) and change what you need.
+# It never holds a key: API keys stay in environment variables (for Claude: ANTHROPIC_API_KEY).
+
+# Which answer provider to use. This one line is the switch between offline and a model.
+#   "guide"      offline: dates, steps and direct quotes from OSU's pages. Free. The default.
+#   "anthropic"  Claude through Anthropic's API. Paid: also needs allow_paid_calls and the SDK
+#                (pip install -r requirements-model.txt).
+provider = "guide"
+
+# The project owner's approval for paid calls. Leave it out unless the owner has approved them.
+# allow_paid_calls = "yes"
+
+# Which Claude model the "anthropic" provider uses, and how hard it thinks ("low" is fastest).
+# model = "claude-haiku-5-5"
+# effort = "low"
+
+# When to use the hand-checked answers in beaverbot/pinned.json:
+#   "on"        first, before searching (the default with an offline provider)
+#   "fallback"  only when the provider can't answer (the default with a model)
+#   "off"       never
+# pinned = "fallback"
+
+# The live web backup (beaverbot/live.py). When our stored pages can't answer, search OSU's own sites with Brave
+# Search and, if needed, read one page politely. Needs the BRAVE_SEARCH_API_KEY environment variable. Off by default.
+# live_search = "on"
+# brave_monthly_limit = "1000"      # searches per month; the backup stops itself at 90% of this

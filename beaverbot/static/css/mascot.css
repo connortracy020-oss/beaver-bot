@@ -1,0 +1,102 @@
+/* The mascot's expressions. See js/mascot.js for the moods. */
+.mascot { display: block; position: relative; line-height: 0; }
+.mascot .logo { display: block; width: 100%; height: auto; overflow: visible; }
+.logo .badge { fill: var(--badge); transition: fill .3s; }
+.mascot.avatar { width: 40px; height: 40px; flex: none; }
+.mascot.brand { width: 34px; height: 34px; }
+.mascot.hero { width: 150px; }
+.mascot.mini { width: 56px; }
+
+.logo .eye, .logo .ant, .logo .whole, .logo .ear, .logo .brow, .logo .open, .logo .mouth, .logo .bulb, .logo .glow { transform-box: fill-box; transform-origin: center; }
+.logo .ant { transform-origin: 50% 100%; transition: transform .35s var(--spring); }
+.logo .ear { transition: transform .3s var(--spring); }
+.logo .ear-l { transform-origin: 70% 80%; } .logo .ear-r { transform-origin: 30% 80%; }
+.logo .whole { transition: transform .4s var(--spring); transform-origin: 50% 60%; }
+.logo .look { transition: transform .12s ease-out; }
+.logo .open { transition: opacity .12s, transform .2s var(--spring); }
+.logo .arc, .logo .shut, .logo .brow, .logo .glow { opacity: 0; transition: opacity .16s, transform .3s var(--spring); }
+.logo .mouth { transition: transform .3s var(--spring); transform-origin: 50% 0; }
+
+/* reactions (short, replayed by adding a class) */
+.mascot.blink .open { animation: m-blink .22s ease; }
+.mascot[data-mood="calm"].blink .open { animation-duration: .4s; }
+.mascot.ping .ant { animation: m-twitch .32s ease; }
+.mascot.boing .whole { animation: m-boing .58s var(--spring); }
+.mascot.surprised .open { transform: scale(1.22); }
+.mascot.surprised .ant { transform: scaleY(1.18); }
+.mascot.wink .eye-r .open { opacity: 0; }
+.mascot.wink .eye-r .shut { opacity: 1; }
+.mascot.oops .ear-l { transform: rotate(-22deg); } .mascot.oops .ear-r { transform: rotate(22deg); }
+.mascot.oops .brow { opacity: 1; }
+.mascot.oops .brow-l { transform: rotate(-14deg) translateY(4px); } .mascot.oops .brow-r { transform: rotate(14deg) translateY(4px); }
+.mascot.oops .ant { transform: rotate(16deg); }
+.mascot.celebrate .whole { animation: m-hop .7s var(--spring); }
+.mascot.celebrate .glow { animation: m-glow .7s ease; }
+@keyframes m-blink { 50% { transform: scaleY(.08); } }
+@keyframes m-twitch { 25% { transform: rotate(-11deg); } 75% { transform: rotate(11deg); } }
+@keyframes m-boing { 40% { transform: scale(1.09,.93); } 70% { transform: scale(.97,1.04); } }
+@keyframes m-hop { 30% { transform: translateY(-9%) scale(.97,1.05); } 60% { transform: translateY(0) scale(1.07,.94); } }
+@keyframes m-glow { 30% { opacity: .55; transform: scale(1.5); } }
+
+/* listening: ears perk up, antenna leans in */
+.mascot[data-mood="listening"] .ear { transform: scale(1.14); }
+.mascot[data-mood="listening"] .ant { transform: rotate(7deg); }
+.mascot[data-mood="listening"] .glow { opacity: .28; }
+
+/* thinking: eyes up, one brow raised, the circuit runs */
+.mascot[data-mood="thinking"] .brow-r { opacity: 1; transform: translateY(-9px) rotate(-7deg); }
+.mascot[data-mood="thinking"] .ant { animation: m-sway 1.5s ease-in-out infinite; }
+.mascot[data-mood="thinking"] .trace { stroke-dasharray: 10 8; animation: m-flow .6s linear infinite; }
+.mascot[data-mood="thinking"] .pad { animation: m-pad 1s ease-in-out infinite; }
+.mascot[data-mood="thinking"] .pad:nth-of-type(2) { animation-delay: .2s; }
+.mascot[data-mood="thinking"] .pad:nth-of-type(3) { animation-delay: .4s; }
+.mascot[data-mood="thinking"] .glow { animation: m-think-glow 1.5s ease-in-out infinite; }
+@keyframes m-sway { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+@keyframes m-flow { to { stroke-dashoffset: -18; } }
+@keyframes m-pad { 50% { fill: #FFF3E2; } }
+@keyframes m-think-glow { 50% { opacity: .4; transform: scale(1.25); } }
+
+/* happy: smiling eyes, ears up, a slightly wider grin */
+.mascot[data-mood="happy"] .open { opacity: 0; }
+.mascot[data-mood="happy"] .arc { opacity: 1; }
+.mascot[data-mood="happy"] .ear { transform: scale(1.1) translateY(-3px); }
+.mascot[data-mood="happy"] .mouth { transform: scale(1.06, 1.05); }
+.mascot[data-mood="happy"] .glow { opacity: .35; }
+
+/* confused: head tilts, brows go uneven, antenna droops */
+.mascot[data-mood="confused"] .whole { transform: rotate(-6deg); }
+.mascot[data-mood="confused"] .brow { opacity: 1; }
+.mascot[data-mood="confused"] .brow-l { transform: translateY(-10px) rotate(-12deg); }
+.mascot[data-mood="confused"] .brow-r { transform: translateY(3px) rotate(10deg); }
+.mascot[data-mood="confused"] .eye-r .open { transform: scale(.82); }
+.mascot[data-mood="confused"] .ant { transform: rotate(24deg); }
+.mascot[data-mood="confused"] .ear-r { transform: rotate(14deg); }
+
+/* calm: steady and attentive. No bounce, no glow, no tracking. */
+.mascot[data-mood="calm"] .brow { opacity: .55; transform: translateY(-3px); }
+.mascot[data-mood="calm"] * { animation: none; }
+
+/* sleepy: eyes closed, slow breathing */
+.mascot[data-mood="sleepy"] .open { opacity: 0; }
+.mascot[data-mood="sleepy"] .shut { opacity: 1; }
+.mascot[data-mood="sleepy"] .ant { transform: rotate(20deg); }
+.mascot[data-mood="sleepy"] .whole { animation: m-breathe 3.6s ease-in-out infinite; }
+@keyframes m-breathe { 50% { transform: scale(1.025, .975) translateY(1%); } }
+
+/* things that float beside the hero mascot */
+.mascot-float { position: absolute; pointer-events: none; z-index: 2; line-height: 1.25; }
+.bubble { left: 72%; top: -14px; width: max-content; max-width: 190px; background: var(--ink); color: var(--bg); font-size: .9rem; padding: 7px 12px;
+  border-radius: 14px 14px 14px 4px; opacity: 0; transform: translateY(6px) scale(.96); transform-origin: bottom left; transition: opacity .2s, transform .25s var(--spring); }
+.bubble.on { opacity: 1; transform: none; }
+.zzz { right: -4px; top: -2px; font-size: 1.1rem; color: var(--muted); opacity: 0; transition: opacity .4s; }
+.mascot[data-mood="sleepy"] ~ .zzz, .mascot-box[data-mood="sleepy"] .zzz { opacity: 1; animation: m-zzz 3.2s ease-in-out infinite; }
+@keyframes m-zzz { 0% { transform: translate(0, 4px); opacity: 0; } 30% { opacity: .9; } 100% { transform: translate(10px, -16px); opacity: 0; } }
+
+.spark { position: fixed; z-index: 95; width: 7px; height: 7px; margin: -3.5px; border-radius: 50%; background: var(--orange); pointer-events: none; animation: m-spark .7s var(--ease) both; }
+.spark:nth-of-type(2n) { background: var(--ink); width: 5px; height: 5px; }
+@keyframes m-spark { to { transform: translate(var(--dx), var(--dy)) scale(.2); opacity: 0; } }
+
+@media (max-width: 620px) {
+  .mascot.hero { width: 104px; }
+  .bubble { left: 104%; top: 8px; }
+}

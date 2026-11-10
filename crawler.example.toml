@@ -1,0 +1,11 @@
+# Copy to crawler.toml (gitignored) and fill in contact_email, or set OSU_CRAWLER_CONTACT instead.
+# The crawler refuses to run a real crawl without a contact. Never commit crawler.toml.
+
+contact_email = ""          # your @oregonstate.edu address, shown in the User-Agent
+
+min_delay_s = 2.0           # floor between requests to one host; robots crawl-delay wins if larger
+min_global_delay_s = 3.0    # floor between ANY two requests to OSU: its sites share one Cloudflare rate limit
+timeout_s = 30.0
+max_retries_5xx = 3         # exponential backoff: 5s, 10s, 20s (+ jitter)
+max_html_bytes = 5_000_000
+max_pdf_bytes = 25_000_000

@@ -1,0 +1,197 @@
+[
+  {
+    "id": "payment-plan",
+    "match": "payment plans?\\b|pay (my )?(tuition|bill).{0,25}(installments|monthly|over time|in parts)",
+    "unless": "\\blate\\b|miss(ed)? a payment",
+    "answer": {
+      "en": "You set one up online in myBill, OSU's billing site. [1]\n+ Go to mybill.oregonstate.edu and choose \"Login with ONID\". You sign in on OSU's own page.\n+ Open the \"Payment Plans\" tab at the top of the screen. [2]\n+ Select 'Current/ATD term' from the dropdown.\n+ Pick the plan option that works best for you. [3]\n\n## Good to know\n- Enrolling in a plan costs $15. [4]\n- If you stay current on your payments, you can register for future terms even if your balance is over the registration limit. [5]\n- A current-term plan also keeps you clear of that term's late fee. [6]",
+      "es": "Lo configuras en línea en myBill, el sitio de facturación de OSU. [1]\n+ Entra a mybill.oregonstate.edu y elige \"Login with ONID\". Inicias sesión en la página de OSU.\n+ Abre la pestaña \"Payment Plans\" en la parte superior de la pantalla. [2]\n+ Elige 'Current/ATD term' en el menú.\n+ Escoge la opción de plan que mejor te funcione. [3]\n\n## Bueno saber\n- Inscribirte en un plan cuesta $15. [4]\n- Si te mantienes al día con tus pagos, puedes inscribirte en trimestres futuros aunque tu saldo supere el límite de inscripción. [5]\n- Un plan del trimestre actual también te libra del cargo por pago tardío de ese trimestre. [6]"
+    },
+    "citations": [
+      {"url": "https://finance.oregonstate.edu/student-accounts/payment-plans", "quote": "The payment plan options can be found by going to mybill.oregonstate.edu and clicking on \"Login with ONID\"."},
+      {"url": "https://finance.oregonstate.edu/student-accounts/payment-plans", "quote": "Once logged in click on the \"Payment Plans\" tab on the top of the screen, and select 'Current/ATD term' from the dropdown."},
+      {"url": "https://finance.oregonstate.edu/student-accounts/payment-plans", "quote": "The payment plan options will be listed, and you are able to choose which option works best for you."},
+      {"url": "https://finance.oregonstate.edu/student-accounts/payment-plans", "quote": "Payment plans are subject to a $15.00 plan enrollment fee."},
+      {"url": "https://finance.oregonstate.edu/student-accounts/payment-plans", "quote": "By enrolling in a payment plan and staying current on your payments, you are able to register for future terms even if your balance exceeds the registration threshold."},
+      {"url": "https://finance.oregonstate.edu/student-accounts/payment-plans", "quote": "Accounts enrolled in a current term payment plan will be exempt from the late fee for that term."}
+    ],
+    "followups": {
+      "en": ["What happens if I pay my bill late?", "How do I apply for scholarships?", "How do I apply for financial aid?"],
+      "es": ["¿Qué pasa si pago mi factura tarde?", "¿Cómo solicito becas?", "¿Cómo solicito ayuda financiera?"]
+    }
+  },
+  {
+    "id": "late-bill",
+    "match": "(pay|paid|payment|bill|tuition).{0,30}\\blate\\b|\\blate\\b.{0,30}(pay|bill|tuition|fee)|miss(ed)? a payment|late fee",
+    "answer": {
+      "en": "Mainly a late fee. Here's how it works:\n- If you have an unpaid balance over $500 on the 2nd day of the month after the term's first bill is due, and you're not in a payment plan, an $85 late fee is charged once per term. [1]\n- A current-term payment plan keeps you clear of that term's late fee. [2]\n- There's no penalty for paying early. [3]",
+      "es": "Sobre todo, un cargo por pago tardío. Funciona así:\n- Si tienes un saldo sin pagar de más de $500 el día 2 del mes siguiente al vencimiento de la primera factura del trimestre, y no estás en un plan de pago, se cobra un cargo de $85 una vez por trimestre. [1]\n- Un plan de pago del trimestre actual te libra del cargo por pago tardío de ese trimestre. [2]\n- No hay penalidad por pagar antes. [3]"
+    },
+    "citations": [
+      {"url": "https://catalog.oregonstate.edu/tuition-fees-payment/", "quote": "On the 2nd day of the month after the first bill of the term is due, if there is an unpaid balance greater the $500.00 and you are not currently enrolled in a payment plan, a $85.00 student account late fee would be charged once per term."},
+      {"url": "https://finance.oregonstate.edu/student-accounts/payment-plans", "quote": "Accounts enrolled in a current term payment plan will be exempt from the late fee for that term."},
+      {"url": "https://catalog.oregonstate.edu/tuition-fees-payment/", "quote": "There is no penalty for early repayment of all or any part of the account"}
+    ],
+    "followups": {
+      "en": ["How do I set up a payment plan?", "How do I apply for financial aid?", "How do I apply for scholarships?"],
+      "es": ["¿Cómo configuro un plan de pago?", "¿Cómo solicito ayuda financiera?", "¿Cómo solicito becas?"]
+    }
+  },
+  {
+    "id": "tutoring",
+    "match": "\\btutor",
+    "unless": "online|ecampus|distance|cost|veteran",
+    "answer": {
+      "en": "There isn't one tutoring center at OSU. There are a few ways to get help, depending on the class: [1]\n- **Subject help centers:** the Math and Statistics Learning Center, the Econ tutoring lab and the Mole Hole (for chemistry) help students taking those classes. [2]\n- **Supplemental Instruction:** free, peer-led group study tables for some of the toughest classes. [3]\n- **Ecampus courses:** online tutoring through your Canvas course menu. [4]\n- **Not sure which one fits?** Talk to a Strategist at the Academic Success Center, your academic advisor, or your instructor. [5]",
+      "es": "No hay un solo centro de tutoría en OSU. Hay varias formas de recibir ayuda, según la clase: [1]\n- **Centros de ayuda por materia:** el Math and Statistics Learning Center, el laboratorio de tutoría de economía y el Mole Hole (química) ayudan a quienes toman esas clases. [2]\n- **Supplemental Instruction:** mesas de estudio en grupo, gratis y dirigidas por estudiantes, para algunas de las clases más difíciles. [3]\n- **Cursos de Ecampus:** tutoría en línea desde el menú de tu curso en Canvas. [4]\n- **¿No sabes cuál te sirve?** Habla con un Strategist del Academic Success Center, con tu asesor académico o con tu instructor. [5]"
+    },
+    "citations": [
+      {"url": "https://success.oregonstate.edu/academic-support", "quote": "There isn’t one tutoring center at OSU, but there are a few different ways to get content help."},
+      {"url": "https://success.oregonstate.edu/academic-support", "quote": "There are some subject help centers like the Math and Statistics Learning Center, the Econ tutoring lab, and the Mole Hole (for chemistry) that provide subject support to students taking those classes."},
+      {"url": "https://success.oregonstate.edu/", "quote": "Get support with your toughest classes from Supplemental Instruction (SI), a free peer-led, group study program."},
+      {"url": "https://success.oregonstate.edu/academic-support", "quote": "If you are taking an Ecampus course, you have access to online tutoring through your Canvas course menu for a number of subjects"},
+      {"url": "https://success.oregonstate.edu/academic-support", "quote": "You can get a more comprehensive sense of what’s available by talking to a Strategist at the Academic Success Center, your academic advisor, or asking your instructor about support available for that course."}
+    ],
+    "followups": {
+      "en": ["How do I get help with writing a paper?", "Is tutoring available for online students?", "How do I find an internship?"],
+      "es": ["¿Dónde me ayudan a escribir un ensayo?", "¿Hay tutoría para estudiantes en línea?", "¿Cómo encuentro una pasantía?"]
+    }
+  },
+  {
+    "id": "counselor",
+    "match": "counsel(or|ing)|therap(y|ist)|\\bcaps\\b|mental health",
+    "unless": "admission|career|high school|academic counsel",
+    "answer": {
+      "en": "Start with Counseling & Psychological Services (CAPS). There's more than one way in: [1]\n- **For counseling,** schedule a brief phone consultation with a triage specialist. You can book it online. [2]\n- **Would rather not book online?** The office can schedule you by phone or in person during business hours. [3]\n- **Want to talk to someone today?** TELUS Health gives you free access to a counselor anytime, from anywhere. [4]\n\nIf it's urgent, call CAPS at 541-737-2131. After hours, choose option 1 to reach a crisis counselor. [5]",
+      "es": "Empieza con Counseling & Psychological Services (CAPS). Hay más de una forma de entrar: [1]\n- **Para consejería,** agenda una breve consulta telefónica con un especialista. Puedes reservarla en línea. [2]\n- **¿Prefieres no reservar en línea?** La oficina puede agendarte por teléfono o en persona en horario de oficina. [3]\n- **¿Quieres hablar con alguien hoy?** TELUS Health te da acceso gratis a un consejero en cualquier momento y desde cualquier lugar. [4]\n\nSi es urgente, llama a CAPS al 541-737-2131. Fuera de horario, elige la opción 1 para hablar con un consejero de crisis. [5]"
+    },
+    "citations": [
+      {"url": "https://counseling.oregonstate.edu/", "quote": "We offer a diverse range of services to benefit your mental health and well-being."},
+      {"url": "https://counseling.oregonstate.edu/getting-started-caps", "quote": "To start, schedule a brief phone consultation with a triage specialist to discuss your needs. You may book this online"},
+      {"url": "https://counseling.oregonstate.edu/getting-started-caps", "quote": "If you prefer not to schedule online, our office specialists can help you schedule by phone or in person during business hours"},
+      {"url": "https://counseling.oregonstate.edu/getting-started-caps", "quote": "We partner with TELUS Health to provide you with free access to a counselor anytime, from anywhere in the world."},
+      {"url": "https://counseling.oregonstate.edu/getting-started-caps", "quote": "give us a call at 541-737-2131. Immediate help is also available whenever we are closed. When calling after hours, select option 1 from the menu to reach a crisis counselor."}
+    ],
+    "followups": {
+      "en": ["What does Student Health Services offer?", "Do I need health insurance?", "Where do I get tutoring?"],
+      "es": ["¿Qué ofrece Student Health Services?", "¿Necesito seguro médico?", "¿Dónde consigo tutoría?"]
+    }
+  },
+  {
+    "id": "parking-permit",
+    "match": "parking (permit|pass)|permit.{0,15}\\bpark|where (can|do) i park",
+    "unless": "visitor|refund|citation|ticket|cost|how much|price",
+    "answer": {
+      "en": "You need a permit to park in the A, B or C zones on weekdays from 7 a.m. to 5 p.m., all year. [1]\n- **Living on campus:** you're only eligible for Residential (R) permits. [2] They have sold out before, so buy a permit before you bring a car. [3]\n- **Living off campus:** you're eligible for commuter A, B or C permits. [4]\n- **Permits are virtual:** your license plate is your permit, so keep your vehicle information up to date. [5]\n- **Prices and sale dates** are on OSU's Parking Rates page. [6]",
+      "es": "Necesitas un permiso para estacionarte en las zonas A, B o C entre semana, de 7 a.m. a 5 p.m., todo el año. [1]\n- **Si vives en el campus:** solo puedes obtener permisos Residenciales (R). [2] Se han agotado antes, así que compra un permiso antes de traer un auto. [3]\n- **Si vives fuera del campus:** puedes obtener permisos de viajero A, B o C. [4]\n- **Los permisos son virtuales:** tu placa es tu permiso, así que mantén al día los datos de tu vehículo. [5]\n- **Los precios y las fechas de venta** están en la página Parking Rates de OSU. [6]"
+    },
+    "citations": [
+      {"url": "https://transportation.oregonstate.edu/parking", "quote": "When arriving to campus you will need a parking permit valid in the A, B, or C Zones, or any ADA space, Monday through Friday 7 a.m. to 5 p.m., year-round."},
+      {"url": "https://transportation.oregonstate.edu/newstudent", "quote": "Students living on campus are only eligible for Residential R parking permits."},
+      {"url": "https://transportation.oregonstate.edu/newstudent", "quote": "Residential parking permits have sold out in the past, so we advise that you do not bring a car unless you have already purchased a permit."},
+      {"url": "https://transportation.oregonstate.edu/newstudent", "quote": "Off-campus residents are eligible for commuter A, B, or C permits."},
+      {"url": "https://transportation.oregonstate.edu/newstudent", "quote": "Your license plate is your permit. Keep your vehicle information up-to-date with our department."},
+      {"url": "https://transportation.oregonstate.edu/parking", "quote": "Parking permit rates and sale dates for 2026-27 are available on the Parking Rates page."}
+    ],
+    "followups": {
+      "en": ["How do I apply for housing?", "How does the Beaver Bus work?", "When does winter term start?"],
+      "es": ["¿Cómo solicito vivienda?", "¿Cómo funciona el Beaver Bus?", "¿Cuándo empieza el trimestre de invierno?"]
+    }
+  },
+  {
+    "id": "su-grading",
+    "match": "\\bs/u\\b|grading basis|pass.?(/| )?no.?pass|satisfactory.?/?.?unsatisfactory",
+    "unless": "deadline|\\bwhen\\b|last day",
+    "answer": {
+      "en": "You ask for it with OSU's online Change of Grading Basis form, and your advisor has to approve it. [1]\n+ Open the online Change of Grading Basis form. [2]\n+ Select the term to see your class schedule. Only classes with the S/U option show up. [3]\n+ Pick the class and the grading option you want. [4]\n+ Submit the form. It goes to your academic advisor for review and approval. [5]\n\n## Good to know\n- S/U grades carry no grade points and don't count in your GPA. [6]\n- You can switch back to A-F any time before the change of grading basis deadline. [7]\n- The deadline is on the Academic Calendar. [8]",
+      "es": "Lo pides con el formulario en línea Change of Grading Basis de OSU, y tu asesor tiene que aprobarlo. [1]\n+ Abre el formulario en línea Change of Grading Basis. [2]\n+ Elige el trimestre para ver tu horario. Solo aparecen las clases que tienen la opción S/U. [3]\n+ Escoge la clase y la opción de calificación que quieres. [4]\n+ Envía el formulario. Llega a tu asesor académico para su revisión y aprobación. [5]\n\n## Bueno saber\n- Las calificaciones S/U no dan puntos y no cuentan en tu promedio (GPA). [6]\n- Puedes volver a A-F en cualquier momento antes de la fecha límite. [7]\n- La fecha límite está en el Calendario Académico. [8]"
+    },
+    "citations": [
+      {"url": "https://registrar.oregonstate.edu/change-grading-basis", "quote": "Changing the grading basis of a course requires academic advisor approval."},
+      {"url": "https://registrar.oregonstate.edu/change-grading-basis", "quote": "Access the online Change of Grading Basis form."},
+      {"url": "https://registrar.oregonstate.edu/change-grading-basis", "quote": "Select Term to view your class schedule. Note: Only the classes with the Satisfactory/Unsatisfactory (S/U) option will display."},
+      {"url": "https://registrar.oregonstate.edu/change-grading-basis", "quote": "Select the class and desired grading option from drop-down menu."},
+      {"url": "https://registrar.oregonstate.edu/change-grading-basis", "quote": "Submit the form. This starts the signature routing process to your academic advisor for review and approval."},
+      {"url": "https://registrar.oregonstate.edu/change-grading-basis", "quote": "S/U grades carry no grade points and are not included in the grade point average (GPA) calculation."},
+      {"url": "https://registrar.oregonstate.edu/change-grading-basis", "quote": "Yes, you can change your grading basis at any point before the change of grading basis deadline."},
+      {"url": "https://registrar.oregonstate.edu/change-grading-basis", "quote": "For deadlines to submit your Change of Grading Basis, please see the Academic Calendar."}
+    ],
+    "followups": {
+      "en": ["When is the last day to change the grading basis?", "How do I drop a class?", "What is priority registration?"],
+      "es": ["¿Cuándo es la fecha límite para cambiar la base de calificación?", "¿Cómo dejo una clase?", "¿Qué es la inscripción prioritaria?"]
+    }
+  },
+  {
+    "id": "scholarships",
+    "match": "scholarships?\\b",
+    "unless": "veteran|graduate student|international|honors",
+    "answer": {
+      "en": "Most OSU scholarships go through one system, OSU ScholarDollars. [1]\n- All students, newly admitted and continuing, can apply there. [2]\n- Applications open November 1st each year. [3]\n- Submit by 11:59 pm Pacific on the deadline date. Late and incomplete applications can't go in afterward. [4]\n- Your college, department or student organization may offer more scholarships with a separate application, so ask them too. [5]",
+      "es": "La mayoría de las becas de OSU pasan por un solo sistema, OSU ScholarDollars. [1]\n- Todos los estudiantes, recién admitidos y continuos, pueden solicitar ahí. [2]\n- Las solicitudes abren el 1 de noviembre de cada año. [3]\n- Envía antes de las 11:59 pm (hora del Pacífico) de la fecha límite. Después no se aceptan solicitudes tardías ni incompletas. [4]\n- Tu facultad, departamento u organización estudiantil puede ofrecer más becas con una solicitud aparte; pregúntales también. [5]"
+    },
+    "citations": [
+      {"url": "https://scholarships.oregonstate.edu/scholardollars", "quote": "OSU ScholarDollars is Oregon State University’s scholarship search and application system"},
+      {"url": "https://scholarships.oregonstate.edu/scholardollars", "quote": "All students, newly admitted and continuing, are eligible to apply for scholarships in ScholarDollars."},
+      {"url": "https://scholarships.oregonstate.edu/scholardollars", "quote": "Beginning November 1st each year, students may use OSU ScholarDollars to submit applications for donor-funded scholarships available."},
+      {"url": "https://scholarships.oregonstate.edu/scholardollars", "quote": "ScholarDollars applications must be submitted by 11:59 pm Pacific Standard Time (PST) on the appropriate deadline date in order to be eligible for consideration."},
+      {"url": "https://scholarships.oregonstate.edu/scholardollars", "quote": "Oregon State’s colleges, departments, student organizations, and other campus programs may offer additional scholarships that require a separate application."}
+    ],
+    "followups": {
+      "en": ["How do I apply for financial aid?", "How do I set up a payment plan?", "What happens if I pay my bill late?"],
+      "es": ["¿Cómo solicito ayuda financiera?", "¿Cómo configuro un plan de pago?", "¿Qué pasa si pago mi factura tarde?"]
+    }
+  },
+  {
+    "id": "writing-help",
+    "match": "(help|feedback|support).{0,30}(writ|paper|essay)|writing (center|help|studio)|(paper|essay).{0,20}(help|feedback)",
+    "unless": "write (my|the|an?) .{0,20}for me",
+    "answer": {
+      "en": "The Writing Center. Its consultants help with any kind of writing project, at any point in the process. [1]\n- **Drop in:** bring your project to the Writing Studio in the Valley Library. No appointment needed. [2]\n- **Send it in:** submit your writing online for written feedback from a peer writing consultant. [3]",
+      "es": "El Writing Center. Sus consultores ayudan con cualquier tipo de proyecto de escritura, en cualquier etapa. [1]\n- **Pasa sin cita:** lleva tu proyecto al Writing Studio en la Valley Library. No necesitas cita. [2]\n- **Envíalo:** manda tu texto en línea y recibe comentarios escritos de un consultor. [3]"
+    },
+    "citations": [
+      {"url": "https://writingcenter.oregonstate.edu/", "quote": "Writing consultants provide support with any type of writing project (class assignments, research papers, CVs/resumes, cover letters, job or scholarship applications, etc.) during any point in your writing process."},
+      {"url": "https://writingcenter.oregonstate.edu/", "quote": "Bring your writing or research project to the Writing Studio in the Valley Library and receive writing and research support from our peer writing consultants. No appointment is necessary and you can stay as long as you want."},
+      {"url": "https://writingcenter.oregonstate.edu/", "quote": "Submit your writing (outline, freewrite, full draft, etc.) online for a written response from a peer writing consultant."}
+    ],
+    "followups": {
+      "en": ["Where do I get tutoring?", "How do I find an internship?", "What counts as academic misconduct?"],
+      "es": ["¿Dónde consigo tutoría?", "¿Cómo encuentro una pasantía?", "¿Qué se considera mala conducta académica?"]
+    }
+  },
+  {
+    "id": "free-food",
+    "match": "free food|food pantry|food insecur|afford (food|groceries)|\\bhungry\\b|enough to eat",
+    "answer": {
+      "en": "The Basic Needs Center is the place to start. [1]\n- It runs the OSU Food Pantry and Beaver Healthy Boosts, where free food is offered at scheduled times each week. [2]\n- You can also talk through your options with a peer navigator. [3]",
+      "es": "El Basic Needs Center es el lugar para empezar. [1]\n- Opera el OSU Food Pantry y Beaver Healthy Boosts, donde se ofrece comida gratis en horarios programados cada semana. [2]\n- También puedes hablar de tus opciones con un compañero guía (peer navigator). [3]"
+    },
+    "citations": [
+      {"url": "https://basicneeds.oregonstate.edu/", "quote": "At the Basic Needs Center, we’re here to offer basic needs strategy support"},
+      {"url": "https://basicneeds.oregonstate.edu/", "quote": "Free food is offered at scheduled times weekly"},
+      {"url": "https://basicneeds.oregonstate.edu/", "quote": "Basic needs strategy conversations with a peer navigator"}
+    ],
+    "followups": {
+      "en": ["How does the Beaver Bus work?", "How do I apply for financial aid?", "How do I see a counselor?"],
+      "es": ["¿Cómo funciona el Beaver Bus?", "¿Cómo solicito ayuda financiera?", "¿Cómo hablo con un consejero?"]
+    }
+  },
+  {
+    "id": "credits-to-graduate",
+    "match": "how many credits.{0,40}(graduat|degree|bachelor)|credits?( do i| are)?( need(ed)?| required)? to graduat|cu[aá]ntos cr[eé]ditos.{0,40}gradua",
+    "unless": "master|ph\\.?d|doctor|graduate (student|school|degree|program)|minor|certificate",
+    "answer": {
+      "en": "A bachelor's degree at OSU takes at least 180 earned credits. [1]\n- At least 60 of them have to be upper-division. [2]\n- Some degree programs ask for more than 180, so check your own program's page or your degree audit. [3]",
+      "es": "Una licenciatura (bachelor's) en OSU requiere al menos 180 créditos aprobados. [1]\n- Al menos 60 deben ser de nivel superior (upper-division). [2]\n- Algunos programas piden más de 180, así que revisa la página de tu programa o tu auditoría de grado. [3]"
+    },
+    "citations": [
+      {"url": "https://catalog.oregonstate.edu/regulations/", "quote": "Credits: Minimum 180 earned credits"},
+      {"url": "https://catalog.oregonstate.edu/regulations/", "quote": "Credits in upper-division courses: minimum 60"},
+      {"url": "https://catalog.oregonstate.edu/regulations/", "quote": "Some degree programs may require more than 180 credits."}
+    ],
+    "followups": {
+      "en": ["How do I order a transcript?", "How do I change a class to S/U grading?", "When is the add/drop deadline?"],
+      "es": ["¿Cómo pido mi expediente académico?", "¿Cómo cambio una clase a calificación S/U?", "¿Cuándo es la fecha límite para agregar o dejar una clase?"]
+    }
+  }
+]

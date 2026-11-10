@@ -1,0 +1,3 @@
+# Only needed to connect a real model (assistant/anthropic_provider.py). Not installed by default.
+# The project owner approves paid calls first: see docs/answer-layer.md.
+anthropic>=1.0

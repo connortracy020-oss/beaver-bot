@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Beaver Bot</title>
+  <rect width="512" height="512" rx="112" fill="#2B2A28"/>
+  <path d="M256 124V82" stroke="#E08A4F" stroke-width="14" stroke-linecap="round"/><circle cx="256" cy="66" r="19" fill="#E08A4F"/>
+  <circle cx="92" cy="172" r="32" fill="#E08A4F"/><circle cx="86" cy="166" r="16" fill="#A85E2F"/>
+  <circle cx="420" cy="172" r="32" fill="#E08A4F"/><circle cx="426" cy="166" r="16" fill="#A85E2F"/>
+  <path d="M256 112C352 112 438 170 444 276C450 378 358 438 256 438C154 438 62 378 68 276C74 170 160 112 256 112Z" fill="#E08A4F"/>
+  <circle cx="176" cy="240" r="24" fill="#2B2A28"/><circle cx="184" cy="231" r="8" fill="#FFFDF8"/>
+  <circle cx="336" cy="240" r="24" fill="#2B2A28"/><circle cx="344" cy="231" r="8" fill="#FFFDF8"/>
+  <ellipse cx="256" cy="326" rx="108" ry="74" fill="#F5C8A3"/>
+  <path d="M224 335Q241 338 256 324Q271 338 288 335V382Q288 394 276 394H236Q224 394 224 382Z" fill="#FFFDF8" stroke="#2B2A28" stroke-width="9" stroke-linejoin="round"/>
+  <path d="M256 330V394" stroke="#2B2A28" stroke-width="7"/>
+  <path d="M192 318Q226 348 256 324Q286 348 320 318" stroke="#2B2A28" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M256 296V324" stroke="#2B2A28" stroke-width="11" stroke-linecap="round"/>
+  <path d="M222 272Q256 256 290 272Q295 292 268 306Q256 312 244 306Q217 292 222 272Z" fill="#2B2A28"/>
+</svg>

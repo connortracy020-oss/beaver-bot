@@ -1,0 +1,4 @@
+# What a public host installs to run the site (docs/deploy.md). The crawler's packages (requirements.txt) are not
+# needed there: the host never crawls. Versions are the ones the site was tested with.
+anthropic==2.7.0
+fastembed==0.9.1

@@ -1,0 +1,638 @@
+<title>Beaver Bot</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* Layout: logo beside the question box, then topics; asking swaps to a two-column answer page. */
+:root {
+  --bg: #FAF4E8; --surface: #FFFBF3; --ink: #2B2A28; --muted: #6D665C;
+  --orange: #E08A4F; --orange-soft: #F6DFC8; --line: #E6DCCB; --on-orange: #2B2A28; --shade: rgba(43,42,40,.38);
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #211F1D; --surface: #2C2A27; --ink: #F6EEDF; --muted: #B7AD9D;
+    --orange: #E8975F; --orange-soft: #4A3526; --line: #423E38; --on-orange: #241F1A; --shade: rgba(0,0,0,.55); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #211F1D; --surface: #2C2A27; --ink: #F6EEDF; --muted: #B7AD9D;
+  --orange: #E8975F; --orange-soft: #4A3526; --line: #423E38; --on-orange: #241F1A; --shade: rgba(0,0,0,.55); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--sans); }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--orange); }
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+h1, h2, h3, p, ul, ol { margin: 0; }
+
+.page { max-width: 1040px; margin: 0 auto; padding-block: 16px 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* top bar */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 4px; border-radius: 12px; font-family: var(--serif); font-size: 1.3rem; }
+.brand .logo { width: 36px; height: 36px; }
+.top-right { display: flex; align-items: center; gap: 10px; }
+.tag { font-size: .78rem; color: var(--muted); }
+.ghost { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 5px 13px; font-size: .84rem; transition: background .15s, border-color .15s; }
+.ghost:hover { background: var(--orange-soft); border-color: var(--orange); }
+
+/* logo */
+.logo { display: block; overflow: visible; }
+.logo .eye, .logo .ant, .logo .whole { transform-box: fill-box; transform-origin: center; }
+.logo .ant { transform-origin: bottom center; }
+.logo.blink .eye { animation: blink .22s ease; }
+.logo.ping .ant { animation: twitch .3s ease; }
+.logo.boing .whole { animation: boing .55s cubic-bezier(.3,1.5,.5,1); }
+.logo.thinking .ant { animation: twitch .7s ease-in-out infinite; }
+.logo.thinking .trace { stroke-dasharray: 10 8; animation: flow .6s linear infinite; }
+.logo.thinking .pad { animation: pad 1s ease-in-out infinite; }
+.logo.thinking .pad:nth-of-type(2) { animation-delay: .2s; }
+.logo.thinking .pad:nth-of-type(3) { animation-delay: .4s; }
+@keyframes blink { 50% { transform: scaleY(.08); } }
+@keyframes twitch { 25% { transform: rotate(-11deg); } 75% { transform: rotate(11deg); } }
+@keyframes boing { 40% { transform: scale(1.09,.93); } 70% { transform: scale(.97,1.04); } }
+@keyframes flow { to { stroke-dashoffset: -18; } }
+@keyframes pad { 50% { fill: #FFF3E2; } }
+
+/* home */
+.hero { display: grid; grid-template-columns: 216px minmax(0,1fr); gap: 40px; align-items: center; padding-block: 44px 28px; }
+.mascot { position: relative; background: none; border: 0; padding: 0; width: 216px; border-radius: 48px; }
+.mascot .logo { width: 100%; height: auto; }
+.bubble { position: absolute; left: 66%; top: -14px; width: max-content; max-width: 160px; background: var(--ink); color: var(--bg); font-size: .82rem; line-height: 1.3; padding: 7px 11px; border-radius: 12px 12px 12px 3px; opacity: 0; transform: translateY(5px); transition: opacity .18s, transform .18s; pointer-events: none; }
+.bubble.on { opacity: 1; transform: none; }
+h1.welcome { font: 400 clamp(2.1rem, 5.2vw, 3.5rem)/1.08 var(--serif); letter-spacing: -.015em; text-wrap: balance; }
+
+/* question box */
+.ask { position: relative; margin-top: 20px; }
+.ask-row { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px; padding: 6px 6px 6px 18px; transition: border-color .15s, box-shadow .15s; }
+.ask-row:focus-within { border-color: var(--orange); box-shadow: 0 0 0 4px var(--orange-soft); }
+.ask input { flex: 1; min-width: 0; border: 0; background: none; outline: 0; font-size: 1.05rem; padding-block: 9px; }
+.ask input::placeholder { color: var(--muted); }
+.go { flex: none; background: var(--orange); color: var(--on-orange); border: 0; border-radius: 13px; padding: 10px 18px; font-weight: 600; transition: transform .12s, filter .12s; }
+.go:hover { filter: brightness(1.06); }
+.go:active { transform: scale(.96); }
+.suggest { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 6px); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 6px; list-style: none; box-shadow: 0 12px 30px var(--shade); }
+.suggest li { padding: 8px 12px; border-radius: 9px; cursor: pointer; }
+.suggest li.on, .suggest li:hover { background: var(--orange-soft); }
+
+/* question chips */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 13px; font-size: .9rem; text-align: left; transition: background .15s, border-color .15s, transform .12s; }
+.chip:hover { background: var(--orange-soft); border-color: var(--orange); transform: translateY(-1px); }
+.chip.live { background: var(--orange); border-color: var(--orange); color: var(--on-orange); font-weight: 500; }
+
+/* topics */
+.section-label { font: 400 1.5rem/1.2 var(--serif); margin-bottom: 14px; }
+.topics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+.topic { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 15px; text-align: left; font-weight: 500; line-height: 1.3; font-size: .95rem; transition: transform .14s, border-color .14s, background .14s; }
+.topic svg { width: 24px; height: 24px; fill: none; stroke: var(--orange); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s; }
+.topic:hover { transform: translateY(-3px); border-color: var(--orange); }
+.topic:hover svg { transform: scale(1.18) rotate(-5deg); }
+
+.foot { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: .84rem; }
+
+/* topic sheet */
+.shade { position: fixed; inset: 0; z-index: 30; background: var(--shade); opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s; }
+.sheet { position: fixed; z-index: 31; top: 0; right: 0; bottom: 0; width: min(420px, 100%); background: var(--bg); border-left: 1px solid var(--line); overflow-y: auto; padding: calc(20px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) 20px; transform: translateX(100%); visibility: hidden; transition: transform .26s cubic-bezier(.2,.8,.2,1), visibility .26s; display: flex; flex-direction: column; gap: 16px; }
+.open .shade { opacity: 1; visibility: visible; }
+.open .sheet { transform: none; visibility: visible; }
+.sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.sheet h2 { font: 400 1.75rem/1.15 var(--serif); }
+.qlist { display: flex; flex-direction: column; gap: 8px; }
+.qlist button { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; text-align: left; transition: border-color .14s, transform .14s; }
+.qlist button:hover { border-color: var(--orange); transform: translateX(3px); }
+.badge { flex: none; background: var(--orange); color: var(--on-orange); font-size: .72rem; font-weight: 600; border-radius: 999px; padding: 2px 8px; }
+.mini { font-size: .78rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.offices { display: flex; flex-direction: column; gap: 6px; }
+
+/* answer */
+.answer-page { padding-top: 22px; }
+h1.question { font: 400 clamp(1.8rem, 4.2vw, 2.7rem)/1.14 var(--serif); letter-spacing: -.01em; margin-top: 26px; text-wrap: balance; }
+.columns { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 36px; margin-top: 20px; align-items: start; }
+.thread { display: grid; grid-template-columns: 48px minmax(0,1fr); gap: 14px; }
+.thread .logo { width: 48px; height: 48px; }
+.steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 5px; color: var(--muted); font-size: .92rem; }
+.steps li { animation: rise .25s ease both; }
+.steps li::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--orange); margin-right: 9px; vertical-align: 2px; }
+.steps li:last-child:not(.done)::before { animation: dot .7s ease-in-out infinite; }
+@keyframes dot { 50% { transform: scale(1.7); opacity: .5; } }
+@keyframes rise { from { opacity: 0; transform: translateY(5px); } }
+.out { max-width: 62ch; }
+.out p, .out ol, .out ul, .out h3 { margin-top: 12px; }
+.out p.lead { font-size: 1.12rem; margin-top: 0; }
+.out h3 { font: 500 1.2rem/1.3 var(--serif); margin-top: 20px; }
+.out ol, .out ul { padding-left: 21px; }
+.out li { margin-top: 6px; }
+.out li::marker { color: var(--orange); font-weight: 600; }
+.w { animation: word .24s ease both; }
+@keyframes word { from { opacity: 0; } }
+.cite { display: inline-grid; place-items: center; min-width: 19px; height: 19px; padding: 0 4px; border: 0; border-radius: 6px; background: var(--orange-soft); font-size: .72rem; font-weight: 600; vertical-align: 2px; transition: background .14s; }
+.cite:hover { background: var(--orange); color: var(--on-orange); }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+.ghost[aria-pressed="true"] { background: var(--orange); border-color: var(--orange); color: var(--on-orange); }
+.note { color: var(--muted); font-size: .84rem; }
+.reveal { animation: rise .35s ease both; }
+
+/* side column */
+.side { display: flex; flex-direction: column; gap: 10px; }
+.source { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 13px; text-decoration: none; transition: border-color .14s, transform .14s, box-shadow .3s; }
+.source:hover { border-color: var(--orange); transform: translateY(-2px); }
+.source.flash { box-shadow: 0 0 0 4px var(--orange); }
+.source strong { display: block; font-weight: 600; line-height: 1.3; }
+.source q { display: block; font-family: var(--serif); font-size: 1rem; line-height: 1.35; margin-top: 7px; }
+.source small { display: block; color: var(--muted); margin-top: 7px; font-size: .78rem; }
+
+/* estimator */
+.calc { margin-top: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+.calc h3 { font: 500 1.25rem/1.25 var(--serif); margin-bottom: 12px; }
+.calc-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.calc-row output { font: 500 1.5rem/1 var(--serif); font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--orange); margin-block: 8px 14px; }
+.plans { display: flex; flex-wrap: wrap; gap: 6px; }
+.plans .ghost { font-size: .82rem; }
+.bar { display: flex; gap: 3px; margin-top: 16px; height: 56px; }
+.seg { min-width: 0; background: var(--orange-soft); border-radius: 9px; display: grid; place-items: center; font-size: .78rem; font-weight: 600; font-variant-numeric: tabular-nums; flex: 1 1 0; transition: flex-grow .3s ease; overflow: hidden; }
+.seg.first { background: var(--orange); color: var(--on-orange); }
+.calc p { margin-top: 12px; font-size: .9rem; }
+
+.toast { position: fixed; z-index: 40; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 12px); max-width: calc(100% - 32px); width: max-content; background: var(--ink); color: var(--bg); padding: 9px 16px; border-radius: 12px; font-size: .9rem; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 800px) {
+  .hero { grid-template-columns: minmax(0,1fr); gap: 20px; padding-block: 24px 22px; }
+  .mascot { width: 128px; border-radius: 30px; }
+  .bubble { left: 108%; top: 10px; border-radius: 12px 12px 12px 3px; }
+  .topics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .columns { grid-template-columns: minmax(0,1fr); gap: 22px; }
+  .tag { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="page">
+  <header class="top">
+    <button class="brand" id="brand" type="button" aria-label="Beaver Bot home"><span data-logo="brandlogo"></span>Beaver Bot</button>
+    <div class="top-right">
+      <span class="tag">Student project demo</span>
+      <button class="ghost" id="theme" type="button">Dark mode</button>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <button class="mascot" id="mascot" type="button" aria-label="Say hi to Beaver Bot">
+        <span data-logo="herologo"></span>
+        <span class="bubble" id="bubble" aria-live="polite"></span>
+      </button>
+      <div>
+        <h1 class="welcome">Hi, I'm Beaver Bot. What do you need help with?</h1>
+        <form class="ask" data-ask autocomplete="off">
+          <div class="ask-row">
+            <input id="q1" type="text" aria-label="Ask anything about campus" placeholder="Ask anything about campus">
+            <button class="go" type="submit">Ask</button>
+          </div>
+          <ul class="suggest" hidden></ul>
+        </form>
+        <div class="chips" id="popular"></div>
+      </div>
+    </section>
+    <section>
+      <h2 class="section-label">Or browse by topic</h2>
+      <div class="topics" id="topics"></div>
+    </section>
+  </main>
+
+  <main id="answer" class="answer-page" hidden>
+    <form class="ask" data-ask autocomplete="off">
+      <div class="ask-row">
+        <input id="q2" type="text" aria-label="Ask another question" placeholder="Ask another question">
+        <button class="go" type="submit">Ask</button>
+      </div>
+      <ul class="suggest" hidden></ul>
+    </form>
+    <h1 class="question" id="question"></h1>
+    <div class="columns">
+      <div>
+        <div class="thread">
+          <span data-logo="answerlogo"></span>
+          <div>
+            <ul class="steps" id="steps"></ul>
+            <div class="out" id="out"></div>
+            <div class="actions reveal" id="actions" hidden>
+              <button class="ghost" id="up" type="button" aria-pressed="false">Helpful</button>
+              <button class="ghost" id="down" type="button" aria-pressed="false">Not helpful</button>
+              <button class="ghost" id="copy" type="button">Copy answer</button>
+              <button class="ghost" id="again" type="button">Replay</button>
+            </div>
+            <section class="calc reveal" id="calc" hidden>
+              <h3>Estimate your payments</h3>
+              <div class="calc-row"><label for="bill">Your balance (try any amount)</label><output id="billout" for="bill"></output></div>
+              <input id="bill" type="range" min="500" max="12000" step="50" value="3000">
+              <div class="plans" id="plans"></div>
+              <div class="bar" id="bar"></div>
+              <p id="calctext"></p>
+              <p class="note">Estimate only, and it doesn't include the $15 fee. Which plans you can pick depends on the month you enroll. See the <a href="https://finance.oregonstate.edu/student-accounts/payment-plans" target="_blank" rel="noopener">official plan table</a>, and myBill shows your real amounts.</p>
+            </section>
+            <div class="reveal" id="next" hidden>
+              <div class="mini" style="margin-top:24px">Ask next</div>
+              <div class="chips" id="followups" style="margin-top:0"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <aside class="side reveal" id="side" hidden>
+        <div class="mini" style="margin-bottom:0">Official sources</div>
+        <a class="source" id="s1" href="https://finance.oregonstate.edu/student-accounts/payment-plans" target="_blank" rel="noopener">
+          <strong>1. Payment Plans</strong>
+          <q>Payment plans are subject to a $15.00 plan enrollment fee.</q>
+          <small>Student Accounts, OSU · checked Oct 22, 2026</small>
+        </a>
+        <a class="source" id="s2" href="https://catalog.oregonstate.edu/tuition-fees-payment/" target="_blank" rel="noopener">
+          <strong>2. Tuition, Fees &amp; Payment</strong>
+          <q>a $85.00 student account late fee would be charged once per term</q>
+          <small>Academic Catalog, OSU · checked Oct 22, 2026</small>
+        </a>
+        <a class="source" href="https://finance.oregonstate.edu/student-accounts" target="_blank" rel="noopener">
+          <strong>Need a person?</strong>
+          <small>Contact Student Accounts at OSU</small>
+        </a>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="foot">Beaver Bot is an independent student class project. It is not affiliated with, endorsed by, or run by Oregon State University. Always confirm details on the official page linked with each answer.</footer>
+</div>
+
+<div class="shade" id="shade"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-head">
+    <h2 id="sheetTitle"></h2>
+    <button class="ghost" id="closeSheet" type="button">Close</button>
+  </div>
+  <div><div class="mini">Questions students ask</div><div class="qlist" id="sheetQs"></div></div>
+  <div><div class="mini">Official offices</div><div class="offices" id="sheetLinks"></div></div>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const PLAN_Q = "How do I set up a payment plan?";
+const TOPICS = [
+  { id:"admissions", name:"Getting in", full:"Getting in: admissions, transfer & international", icon:"M4 20V6a2 2 0 0 1 2-2h8v16M14 4l6 2v14M3 20h18M11 12h.01",
+    qs:["How do I apply as a transfer student?","Will my credits transfer to OSU?","Where do international students get help?"],
+    links:[["Office of Admissions","https://admissions.oregonstate.edu/contact-information"],["Transfer Students","https://transfer.oregonstate.edu/contact-us"]] },
+  { id:"registration", name:"Registration & classes", icon:"M9 4h6v3H9zM7 5H5v15h14V5h-2M9 13l2 2 4-4",
+    qs:["How do I drop a class?","When can I register?","How do I change a class to S/U grading?"],
+    links:[["Office of the Registrar","https://registrar.oregonstate.edu/contact-us"]] },
+  { id:"dates", name:"Dates & deadlines", icon:"M4 6h16v14H4zM4 10h16M8 3v4M16 3v4",
+    qs:["When is the last day to add a class?","When does winter term start?","When are finals?"],
+    links:[["Academic Calendar","https://registrar.oregonstate.edu/osu-academic-calendar"]] },
+  { id:"courses", name:"Courses & degrees", full:"Courses & degree requirements", icon:"M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2zM19 18v3H6a2 2 0 0 1-2-1",
+    qs:["What classes do I still need?","What counts for Core Education?","How do I add a minor?"],
+    links:[["Office of the Registrar","https://registrar.oregonstate.edu/contact-us"]] },
+  { id:"paying", name:"Paying for college", icon:"M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v10M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.8 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5",
+    qs:[PLAN_Q,"When is tuition due?","How do I apply for scholarships?"],
+    links:[["Office of Financial Aid","https://financialaid.oregonstate.edu/contact-us"],["Student Accounts","https://finance.oregonstate.edu/student-accounts"]] },
+  { id:"living", name:"Housing, dining & campus life", icon:"M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6",
+    qs:["How do I apply for housing?","What meal plans are there?","How do I get a parking permit?"],
+    links:[["Housing & Dining Services","https://uhds.oregonstate.edu/contact-uhds"],["Transportation Services","https://transportation.oregonstate.edu/contact-us"]] },
+  { id:"health", name:"Health, counseling & crisis", icon:"M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z",
+    qs:["How do I see a counselor?","Where is Student Health Services?","Who can I talk to right now?"],
+    links:[["Counseling & Psychological Services (24/7: 541-737-2131)","https://counseling.oregonstate.edu/hours-location"],["Student Health Services","https://studenthealth.oregonstate.edu/locations"]] },
+  { id:"accessibility", name:"Accessibility", icon:"M12 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM5 8l7 1.5L19 8M12 9.5V14l-3 7M12 14l3 7",
+    qs:["How do I request accommodations?","Where can I take an accommodated exam?"],
+    links:[["Disability Access Services","https://ds.oregonstate.edu/hours-and-contact-information"]] },
+  { id:"support", name:"Support, success & careers", icon:"M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v6H4zM17 14h3v6h-3z",
+    qs:["Where can I get tutoring?","How do I meet with my advisor?","Who can help with my resume?"],
+    links:[["Academic Advising","https://advising.oregonstate.edu/"],["Academic Success Center","https://success.oregonstate.edu/"]] },
+  { id:"rights", name:"Rights, conduct & policies", icon:"M12 4v16M8 20h8M5 7h14M5 7l-3 7h6zM19 7l-3 7h6z",
+    qs:["What is the academic misconduct process?","Who can I talk to about a problem with a class?"],
+    links:[["Student Community Standards","https://scs.oregonstate.edu/contact-us"],["Dean of Students","https://studentlife.oregonstate.edu/about-us"]] },
+  { id:"tech", name:"Technology help", icon:"M4 5h16v11H4zM2 20h20M9 16v4M15 16v4",
+    qs:["How do I reset my ONID password?","How do I set up Duo?"],
+    links:[["UIT Service Desk","https://technology.oregonstate.edu/help"]] },
+  { id:"ecampus", name:"Online (Ecampus)", full:"Online (Ecampus) students", icon:"M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18",
+    qs:["How do Ecampus exams work?","Who is my Ecampus advisor?"],
+    links:[["Oregon State Ecampus","https://ecampus.oregonstate.edu/contact/"]] }
+];
+const POPULAR = [PLAN_Q, "How do I drop a class?", "When is tuition due?", "Where can I get tutoring?"];
+const FOLLOWUPS = ["When is tuition due?", "What happens if I miss a payment?", "How do I apply for scholarships?"];
+const ALL_QS = [...new Set(TOPICS.flatMap(t => t.qs).concat(POPULAR))];
+const PLANS = [[.25,3],[.33,2],[.5,2],[.67,1],[.75,1]];
+const BUBBLES = ["Beep. Ask me something.", "These teeth are for chewing through OSU websites.", "I read the official pages so you don't have to.", "Try the payment plan question!", "Hey, that tickles."];
+
+const $ = s => document.querySelector(s);
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let timers = [];
+const later = (fn, ms) => { const t = setTimeout(fn, still ? 0 : ms); timers.push(t); return t; };
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+
+/* Logo: built per instance so each one can look at the pointer */
+function logoSVG(id) {
+  const D = "#2B2A28", O = "#E08A4F";
+  return `<svg class="logo" id="${id}" viewBox="0 0 512 512" role="img" aria-label="Beaver Bot logo">
+  <rect width="512" height="512" rx="112" fill="${D}"/>
+  <g class="whole">
+    <g class="ant"><path d="M256 124V82" stroke="${O}" stroke-width="14" stroke-linecap="round"/><circle cx="256" cy="66" r="19" fill="${O}"/></g>
+    <circle cx="92" cy="172" r="32" fill="${O}"/><circle cx="86" cy="166" r="16" fill="#A85E2F"/>
+    <circle cx="420" cy="172" r="32" fill="${O}"/><circle cx="426" cy="166" r="16" fill="#A85E2F"/>
+    <path d="M256 112C352 112 438 170 444 276C450 378 358 438 256 438C154 438 62 378 68 276C74 170 160 112 256 112Z" fill="${O}"/>
+    <g class="eye"><g class="look"><circle cx="176" cy="240" r="24" fill="${D}"/><circle cx="184" cy="231" r="8" fill="#FFFDF8"/></g></g>
+    <g class="eye"><g class="look"><circle cx="336" cy="240" r="24" fill="${D}"/><circle cx="344" cy="231" r="8" fill="#FFFDF8"/></g></g>
+    <ellipse cx="256" cy="326" rx="108" ry="74" fill="#F5C8A3"/>
+    <path d="M224 335Q241 338 256 324Q271 338 288 335V382Q288 394 276 394H236Q224 394 224 382Z" fill="#FFFDF8" stroke="${D}" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M256 330V394" stroke="${D}" stroke-width="7"/>
+    <path d="M192 318Q226 348 256 324Q286 348 320 318" stroke="${D}" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M256 296V324" stroke="${D}" stroke-width="11" stroke-linecap="round"/>
+    <path d="M222 272Q256 256 290 272Q295 292 268 306Q256 312 244 306Q217 292 222 272Z" fill="${D}"/>
+    <clipPath id="${id}-c"><path d="M256 112C352 112 438 170 444 276C450 378 358 438 256 438C154 438 62 378 68 276C74 170 160 112 256 112Z"/></clipPath>
+    <g clip-path="url(#${id}-c)" stroke="${D}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path class="trace" d="M452 256H412L394 238"/><path class="trace" d="M452 280H400"/><path class="trace" d="M452 304H412L394 322"/>
+      <circle class="pad" cx="387" cy="231" r="9" fill="${O}"/><circle class="pad" cx="391" cy="280" r="9" fill="${O}"/><circle class="pad" cx="387" cy="329" r="9" fill="${O}"/>
+    </g>
+  </g></svg>`;
+}
+document.querySelectorAll("[data-logo]").forEach(el => { el.innerHTML = logoSVG(el.dataset.logo); });
+const logos = () => document.querySelectorAll(".logo");
+function replay(el, cls, ms) { el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); setTimeout(() => el.classList.remove(cls), ms); }
+
+let px = 0, py = 0, queued = false;
+function aim() {
+  queued = false;
+  logos().forEach(svg => {
+    const r = svg.getBoundingClientRect();
+    if (!r.width) return;
+    const dx = px - (r.left + r.width / 2), dy = py - (r.top + r.height * .47);
+    const d = Math.hypot(dx, dy) || 1, reach = Math.min(1, d / 220) * 9;
+    svg.querySelectorAll(".look").forEach(g => g.setAttribute("transform", `translate(${(dx / d * reach).toFixed(1)} ${(dy / d * reach).toFixed(1)})`));
+  });
+}
+addEventListener("pointermove", e => { px = e.clientX; py = e.clientY; if (!queued && !still) { queued = true; requestAnimationFrame(aim); } });
+if (!still) setInterval(() => logos().forEach(l => replay(l, "blink", 240)), 3800);
+
+let bubbleIndex = 0, bubbleTimer;
+function say(text) {
+  const b = $("#bubble"); b.textContent = text; b.classList.add("on");
+  clearTimeout(bubbleTimer); bubbleTimer = setTimeout(() => b.classList.remove("on"), 2600);
+}
+$("#mascot").addEventListener("click", () => { replay($("#herologo"), "boing", 560); replay($("#herologo"), "ping", 320); say(BUBBLES[bubbleIndex++ % BUBBLES.length]); });
+
+/* Home content */
+function questionChip(q) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip" + (q === PLAN_Q ? " live" : ""); b.textContent = q;
+  b.addEventListener("click", () => ask(q));
+  return b;
+}
+POPULAR.forEach(q => $("#popular").append(questionChip(q)));
+FOLLOWUPS.forEach(q => $("#followups").append(questionChip(q)));
+TOPICS.forEach(t => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "topic";
+  b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${t.icon}"/></svg><span>${esc(t.name)}</span>`;
+  b.addEventListener("click", () => openSheet(t, b));
+  $("#topics").append(b);
+});
+
+/* Topic sheet */
+let lastFocus;
+function openSheet(t, from) {
+  lastFocus = from;
+  $("#sheetTitle").textContent = t.full || t.name;
+  $("#sheetQs").replaceChildren(...t.qs.map(q => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.innerHTML = `<span>${esc(q)}</span>` + (q === PLAN_Q ? `<span class="badge">Try this</span>` : "");
+    b.addEventListener("click", () => ask(q, t));
+    return b;
+  }));
+  $("#sheetLinks").replaceChildren(...t.links.map(([label, href]) => {
+    const a = document.createElement("a");
+    a.href = href; a.target = "_blank"; a.rel = "noopener"; a.textContent = label;
+    return a;
+  }));
+  document.body.classList.add("open");
+  $("#closeSheet").focus({ preventScroll: true });
+}
+function closeSheet() {
+  if (!document.body.classList.contains("open")) return;
+  document.body.classList.remove("open");
+  if (lastFocus) lastFocus.focus({ preventScroll: true });
+}
+$("#closeSheet").addEventListener("click", closeSheet);
+$("#shade").addEventListener("click", closeSheet);
+
+/* Question boxes with live suggestions */
+document.querySelectorAll("[data-ask]").forEach(form => {
+  const input = form.querySelector("input"), list = form.querySelector(".suggest");
+  let items = [], active = -1;
+  const hide = () => { list.hidden = true; active = -1; };
+  const paint = () => [...list.children].forEach((li, i) => li.classList.toggle("on", i === active));
+  input.addEventListener("input", () => {
+    replay($("#herologo"), "ping", 320);
+    const text = input.value.trim().toLowerCase();
+    items = text ? ALL_QS.filter(q => q.toLowerCase().includes(text)).slice(0, 5) : [];
+    active = -1;
+    list.replaceChildren(...items.map(q => {
+      const li = document.createElement("li");
+      li.textContent = q;
+      li.addEventListener("pointerdown", e => { e.preventDefault(); hide(); ask(q); });
+      return li;
+    }));
+    list.hidden = !items.length;
+  });
+  input.addEventListener("keydown", e => {
+    if (e.key === "Escape") return hide();
+    if (list.hidden || !items.length) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      active = (active + (e.key === "ArrowDown" ? 1 : -1) + items.length + (active < 0 && e.key === "ArrowUp" ? 1 : 0)) % items.length;
+      paint();
+    }
+  });
+  input.addEventListener("blur", hide);
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const q = active >= 0 ? items[active] : input.value.trim();
+    hide();
+    if (q) ask(q); else { replay(input.closest(".ask-row"), "ping", 320); input.focus(); }
+  });
+});
+
+const prompts = ["Ask anything about campus", PLAN_Q, "When is the last day to add a class?", "Where can I get tutoring?"];
+let promptIndex = 0;
+if (!still) setInterval(() => {
+  const input = $("#q1");
+  if (!input.value && document.activeElement !== input) input.placeholder = prompts[++promptIndex % prompts.length];
+}, 2800);
+
+/* The answer */
+const cite = n => `<button class="cite" type="button" data-s="${n}" aria-label="Source ${n}">${n}</button>`;
+const PLAN_HTML = `
+<p class="lead">You set up a payment plan online in <a href="https://mybill.oregonstate.edu" target="_blank" rel="noopener">myBill</a>, the university's billing site. ${cite(1)}</p>
+<ol>
+  <li>Go to myBill and choose "Login with ONID." You'll sign in on OSU's own page.</li>
+  <li>Open the "Payment Plans" tab at the top of the screen.</li>
+  <li>Select "Current/ATD term" from the dropdown.</li>
+  <li>Pick the plan option that works best for you. ${cite(1)}</li>
+</ol>
+<h3>Good to know</h3>
+<ul>
+  <li>Enrolling in a plan costs $15. ${cite(1)}</li>
+  <li>If you stay current on payments, you can register for future terms even if your balance is over the registration limit. ${cite(1)}</li>
+  <li>A current-term plan also exempts you from that term's late fee. Without a plan, an unpaid balance over $500 can bring an $85 late fee once per term. ${cite(2)}</li>
+</ul>`;
+
+function isPlan(q) { return /payment.?plan|installment|plan.*(tuition|bill)|pay.*(tuition|bill).*(month|over time|parts)/i.test(q); }
+function wrapWords(root, stepMs) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.trim()) nodes.push(walker.currentNode);
+  let i = 0;
+  nodes.forEach(node => {
+    const frag = document.createDocumentFragment();
+    node.nodeValue.split(/(\s+)/).forEach(part => {
+      if (!part) return;
+      if (!part.trim()) return frag.append(part);
+      const s = document.createElement("span");
+      s.className = "w"; s.style.animationDelay = (i++ * stepMs) + "ms"; s.textContent = part;
+      frag.append(s);
+    });
+    node.replaceWith(frag);
+  });
+  return i * stepMs;
+}
+function reset() {
+  timers.forEach(clearTimeout); timers = [];
+  ["#actions", "#calc", "#next", "#side"].forEach(s => { $(s).hidden = true; });
+  $("#out").replaceChildren(); $("#steps").replaceChildren(); $("#steps").hidden = false;
+  ["#up", "#down"].forEach(s => $(s).setAttribute("aria-pressed", "false"));
+}
+function think(on) { $("#answerlogo").classList.toggle("thinking", on); }
+function step(text, ms) {
+  later(() => {
+    [...$("#steps").children].forEach(li => li.classList.add("done"));
+    const li = document.createElement("li"); li.textContent = text; $("#steps").append(li);
+  }, ms);
+}
+let current = { q: "", topic: null };
+function ask(q, topic) {
+  closeSheet();
+  current = { q, topic };
+  reset();
+  $("#home").hidden = true; $("#answer").hidden = false;
+  $("#question").textContent = q; $("#q2").value = ""; $("#q1").value = "";
+  scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
+  think(true);
+  if (isPlan(q)) {
+    step("Reading your question", 0);
+    step("Searching about 7,500 OSU pages", 550);
+    step("Found 2 official sources", 1200);
+    later(() => writePlan(), 1750);
+  } else {
+    step("Reading your question", 0);
+    later(() => writeFallback(q, topic), 700);
+  }
+}
+function writePlan() {
+  $("#steps").hidden = true;
+  const out = $("#out"); out.innerHTML = PLAN_HTML;
+  const total = still ? 0 : wrapWords(out, 24);
+  later(() => {
+    think(false);
+    ["#actions", "#calc", "#next", "#side"].forEach(s => { $(s).hidden = false; });
+    renderCalc();
+    replay($("#answerlogo"), "boing", 560);
+  }, total + 300);
+}
+function writeFallback(q, topic) {
+  $("#steps").hidden = true;
+  const links = topic ? topic.links : [];
+  $("#out").innerHTML = `<p class="lead">In this demo I only know one answer. The full version would answer this from OSU's official pages, with links.</p>
+    ${links.length ? `<p>For now, the right place to ask is ${links.map(([l, h]) => `<a href="${h}" target="_blank" rel="noopener">${esc(l)}</a>`).join(" or ")}.</p>` : ""}
+    <div class="chips" id="fb"></div>`;
+  if (!still) wrapWords($("#out"), 22);
+  const c = questionChip(PLAN_Q), back = document.createElement("button");
+  c.textContent = "Try: " + PLAN_Q;
+  back.type = "button"; back.className = "chip"; back.textContent = "Back to topics";
+  back.addEventListener("click", goHome);
+  $("#fb").append(c, back);
+  later(() => think(false), 500);
+}
+function goHome() {
+  reset(); think(false); closeSheet();
+  $("#answer").hidden = true; $("#home").hidden = false;
+  scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
+}
+$("#brand").addEventListener("click", () => { replay($("#brandlogo"), "boing", 560); goHome(); });
+$("#again").addEventListener("click", () => ask(current.q, current.topic));
+$("#out").addEventListener("click", e => {
+  const b = e.target.closest(".cite"); if (!b) return;
+  if ($("#side").hidden) return;
+  const card = $("#s" + b.dataset.s);
+  card.scrollIntoView({ block: "center", behavior: still ? "auto" : "smooth" });
+  replay(card, "flash", 1100);
+});
+
+/* Rating and copy */
+function toast(text) { const t = $("#toast"); t.textContent = text; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2200); }
+[["#up", "#down"], ["#down", "#up"]].forEach(([a, b]) => $(a).addEventListener("click", () => {
+  const on = $(a).getAttribute("aria-pressed") !== "true";
+  $(a).setAttribute("aria-pressed", on); $(b).setAttribute("aria-pressed", "false");
+  if (on) toast("Thanks. This demo doesn't save ratings.");
+}));
+$("#copy").addEventListener("click", () => {
+  const text = $("#out").innerText + "\n\nSource: https://finance.oregonstate.edu/student-accounts/payment-plans";
+  const done = () => toast("Copied the answer");
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, () => toast("Copy isn't available here"));
+  else toast("Copy isn't available here");
+});
+
+/* Payment estimator */
+let planIndex = 0;
+const money = n => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+PLANS.forEach(([p, n], i) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "ghost";
+  b.textContent = `${Math.round(p * 100)}% down, ${n} payment${n > 1 ? "s" : ""}`;
+  b.addEventListener("click", () => { planIndex = i; renderCalc(); });
+  $("#plans").append(b);
+});
+function renderCalc() {
+  const bill = +$("#bill").value, [p, n] = PLANS[planIndex];
+  const down = bill * p, each = (bill - down) / n;
+  $("#billout").textContent = money(bill).replace(".00", "");
+  [...$("#plans").children].forEach((b, i) => b.setAttribute("aria-pressed", i === planIndex));
+  const bar = $("#bar");
+  while (bar.children.length < n + 1) { const s = document.createElement("div"); s.className = "seg"; bar.append(s); }
+  while (bar.children.length > n + 1) bar.lastChild.remove();
+  [...bar.children].forEach((s, i) => {
+    s.className = "seg" + (i ? "" : " first");
+    s.style.flexGrow = i ? each : down;
+    s.textContent = i ? `$${Math.round(each).toLocaleString("en-US")}` : `$${Math.round(down).toLocaleString("en-US")}`;
+  });
+  $("#calctext").textContent = `About ${money(down)} down, then ${n === 1 ? "one payment" : n + " monthly payments"} of about ${money(each)}.`;
+}
+$("#bill").addEventListener("input", renderCalc);
+renderCalc();
+
+/* Theme */
+const root = document.documentElement;
+function isDark() { return root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; }
+function labelTheme() { $("#theme").textContent = isDark() ? "Light mode" : "Dark mode"; }
+try { const saved = localStorage.getItem("bb-theme"); if (saved) root.dataset.theme = saved; } catch (e) {}
+labelTheme();
+$("#theme").addEventListener("click", () => {
+  root.dataset.theme = isDark() ? "light" : "dark";
+  labelTheme();
+  try { localStorage.setItem("bb-theme", root.dataset.theme); } catch (e) {}
+});
+
+addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+</script>

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Demo sign-in · Beaver Bot</title>
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/demo.css">
+<link rel="stylesheet" href="/static/css/hub.css">
+<link rel="stylesheet" href="/static/css/buddy.css">
+<link rel="stylesheet" href="/static/css/look.css">
+<script src="/static/js/boot.js"></script>
+<script type="module" src="/static/js/signin.js"></script>
+</head>
+<body class="idp">
+<!-- A stand-in for a university sign-in page. It is Beaver Bot's own neutral design on purpose: it does not copy
+     any real login page, has no field that accepts a password, and only offers made-up accounts. -->
+<main class="idp-card" id="idp" aria-live="polite">
+  <p class="idp-banner"><span class="pill sample">Demo</span> <span id="idpBanner">This is a practice sign-in page. It is not Oregon State's, and it never asks for a password.</span></p>
+  <div id="idpBody"><p class="muted">Loading…</p></div>
+</main>
+<p class="idp-foot" id="idpFoot">Independent student project, not affiliated with Oregon State University.</p>
+</body>
+</html>

@@ -1,0 +1,122 @@
+/* The mascot as a character: its newer expressions, the things it holds, and where it lives in the question bar.
+   See js/buddy.js for what it does and js/mascot.js for the drawing. */
+
+/* ---- new expressions and props (the "buddy" drawing) ---- */
+.logo .tail, .logo .arm, .logo .torso, .logo .prop { transform-box: fill-box; }
+.logo .tail { transform-origin: 0% 60%; transition: transform .4s var(--spring); }
+.logo .arm { transform-origin: 50% 10%; transition: transform .3s var(--spring); }
+.logo .prop { opacity: 0; transition: opacity .18s, transform .42s var(--spring); }
+.logo .umbrella { transform-origin: 50% 100%; transform: scale(.15); }
+.mascot[data-mood="searching"] .umbrella { opacity: 1; transform: none; }
+.mascot[data-mood="searching"] .glow { opacity: 0; animation: none; }
+.mascot[data-mood="searching"] .brow { opacity: 1; transform: translateY(-7px); }
+.logo .pencil { transform-origin: 50% 50%; }
+.mascot[data-mood="writing"] .pencil { opacity: 1; animation: m-chew .44s ease-in-out infinite; }
+.mascot[data-mood="writing"] .mouth { animation: m-munch .44s ease-in-out infinite; }
+.mascot[data-mood="writing"] .ear { transform: scale(1.06); }
+@keyframes m-chew { 50% { transform: rotate(3.5deg) translateY(2.5%); } }
+@keyframes m-munch { 50% { transform: scaleY(.88); } }
+.mascot[data-mood="squint"] .open { transform: scaleY(.36); }
+.mascot[data-mood="squint"] .brow { opacity: 1; }
+.mascot[data-mood="squint"] .brow-l { transform: translateY(13px) rotate(15deg); }
+.mascot[data-mood="squint"] .brow-r { transform: translateY(13px) rotate(-15deg); }
+.mascot[data-mood="squint"] .whole { transform: translateY(1.5%) scale(1.04); }
+.mascot[data-mood="squint"] .ant { transform: rotate(-10deg); }
+
+/* ---- the character in the question bar ---- */
+.pal { --w: 64px; --show: 56px; position: absolute; right: 108px; bottom: calc(100% - 1px); width: var(--w); z-index: 6; }
+.buddy-btn { display: block; width: 100%; padding: 0; border: 0; background: none; position: relative; cursor: grab; touch-action: none; border-radius: 12px; -webkit-tap-highlight-color: transparent; }
+.buddy-btn:focus-visible { outline-offset: 5px; }
+.buddy-clip { display: block; height: var(--show); overflow: hidden; transition: height .5s var(--spring); }
+.mascot.buddy { width: var(--w); }
+.courier .mascot.buddy { width: 58px; }
+.paw { position: absolute; bottom: -6px; width: 14px; height: 11px; border-radius: 7px 7px 6px 6px; background: #E08A4F; box-shadow: inset 0 -2.5px 0 #A85E2F, 0 1px 2px rgba(0,0,0,.3); z-index: 2; pointer-events: none;
+  transition: transform .36s var(--spring), opacity .2s; }
+.paw::after { content: ""; position: absolute; left: 4px; right: 4px; top: 3px; bottom: 3px; border-inline: 1.5px solid rgba(43,42,40,.32); }
+.paw-l { left: 4px; } .paw-r { right: 4px; }
+.pal[data-pose="tall"] { --show: 68px; }
+.pal.dozing { --show: 50px; }
+.pal[data-pose="duck"] { --show: 0px; }
+.pal[data-pose="duck"] .paw, .pal[data-pose="sit"] .paw, .pal[data-pose="held"] .paw { opacity: 0; transform: translateY(8px) scale(.5); }
+/* It gets out of the way of the suggestion list, and it ducks while something private is being typed. */
+.ask:has(#q[aria-expanded="true"]) .pal:not([data-pose="sit"]):not([data-pose="held"]),
+.dock-in:has(.private-hint:not([hidden])) .pal:not([data-pose="sit"]):not([data-pose="held"]) { --show: 0px; }
+.ask:has(#q[aria-expanded="true"]) .pal:not([data-pose="sit"]) .paw,
+.dock-in:has(.private-hint:not([hidden])) .pal:not([data-pose="sit"]) .paw { opacity: 0; }
+.pal[data-pose="sit"], .pal[data-pose="held"] { position: fixed; right: auto; bottom: auto; --w: 78px; --show: calc(var(--w) * 776 / 432); z-index: 26;
+  transition: left .5s var(--spring), top .5s var(--spring); filter: drop-shadow(0 9px 8px rgba(60,36,16,.3)); }
+.pal[data-pose="held"] { transition: none; }
+.pal[data-pose="held"] .buddy-btn { cursor: grabbing; }
+.pal[data-pose="held"] .mascot { transform-origin: 50% 14%; animation: dangle .7s ease-in-out infinite alternate; }
+.pal[data-pose="held"] .logo .arm-l { transform: rotate(24deg); }
+.pal[data-pose="held"] .logo .arm-r { transform: rotate(-24deg); }
+@keyframes dangle { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }
+.pal.calm .buddy-btn { cursor: default; }
+.pal.pet .logo .ear { animation: m-twitch .3s ease 3; }
+.pal.pet .logo .whole { animation: m-nuzzle .9s ease; }
+@keyframes m-nuzzle { 30% { transform: rotate(-5deg) translateY(2%); } 65% { transform: rotate(4deg) translateY(1%); } }
+
+.tailpop { position: absolute; right: -24px; bottom: 0; width: 28px; height: 46px; overflow: hidden; pointer-events: none; }
+.tailpop i { position: absolute; left: 4px; bottom: -42px; width: 20px; height: 38px; border-radius: 10px 10px 7px 7px; transform-origin: 50% 100%;
+  background: #A85E2F repeating-linear-gradient(45deg, transparent 0 4px, rgba(43,42,40,.3) 4px 5.5px); }
+.pal.slap:not([data-pose="sit"]) .tailpop i { animation: tail-pop .68s var(--ease); }
+@keyframes tail-pop { 0% { transform: translateY(0); } 30% { transform: translateY(-42px) rotate(-16deg); } 46% { transform: translateY(-44px) rotate(-22deg); }
+  56% { transform: translateY(-36px) rotate(26deg); } 72% { transform: translateY(-38px) rotate(8deg); } 100% { transform: translateY(0); } }
+.pal.slap[data-pose="sit"] .logo .tail { animation: tail-wag .68s var(--ease); }
+@keyframes tail-wag { 30% { transform: rotate(-28deg); } 56% { transform: rotate(16deg); } }
+
+.rain { position: absolute; left: -10px; right: -10px; bottom: 0; height: 58px; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity .3s; }
+.pal:has(.mascot[data-mood="searching"]) .rain { opacity: 1; }
+.rain i { position: absolute; top: -10px; width: 2px; height: 9px; border-radius: 2px; background: var(--muted); opacity: .6; animation: rain .62s linear infinite; }
+.rain i:nth-child(1) { left: 3px; }
+.rain i:nth-child(2) { right: 3px; animation-delay: .22s; }
+.rain i:nth-child(3) { left: 9px; animation-delay: .4s; }
+.rain i:nth-child(4) { right: 10px; animation-delay: .1s; }
+@keyframes rain { to { transform: translateY(70px); } }
+.pal .zzz { position: absolute; right: -10px; top: -8px; font-size: .86rem; font-style: italic; color: var(--muted); opacity: 0; pointer-events: none; }
+.pal.dozing .zzz { opacity: 1; animation: m-zzz 3.2s ease-in-out infinite; }
+
+.buddy-bubble { position: absolute; right: 82%; bottom: calc(100% - 20px); width: max-content; max-width: 230px; background: var(--ink); color: var(--bg); font-size: .94rem; font-style: italic; line-height: 1.25;
+  padding: 7px 13px 8px; border-radius: 14px 14px 4px 14px; opacity: 0; transform: translateY(8px) scale(.92); transform-origin: bottom right; transition: opacity .2s, transform .3s var(--spring);
+  pointer-events: none; z-index: 3; box-shadow: var(--shadow-2); }
+.buddy-bubble.on { opacity: 1; transform: none; }
+.pal[data-side="left"] .buddy-bubble { right: auto; left: 82%; border-radius: 14px 14px 14px 4px; transform-origin: bottom left; }
+
+/* the dam it builds along the bar while the chat is empty */
+.dam { position: absolute; right: 184px; bottom: 100%; width: 160px; height: 34px; pointer-events: none; }
+.twig { position: absolute; left: var(--x); bottom: var(--y); width: var(--w); height: 6px; border-radius: 4px; background: linear-gradient(#B67A43, #8A5425);
+  box-shadow: inset 0 -1.5px 0 rgba(43,42,40,.3), 0 1px 1px rgba(0,0,0,.22); transform: rotate(var(--r)); animation: twig-in .55s var(--thud) both; }
+.twig::after { content: ""; position: absolute; left: 32%; top: -3px; width: 7px; height: 3px; border-radius: 2px; background: #8A5425; transform: rotate(-35deg); }
+@keyframes twig-in { from { opacity: 0; transform: translateY(-18px) rotate(calc(var(--r) - 34deg)); } }
+.dam.washed .twig { transition: transform .45s ease-in, opacity .45s; transform: translate(-34px, 22px) rotate(48deg); opacity: 0; }
+
+/* a brief appearance on the edge of a card or a row */
+.courier { position: absolute; right: 28px; bottom: calc(100% - 2px); width: 58px; pointer-events: none; z-index: 4; }
+.courier-clip { display: block; height: 51px; overflow: hidden; }
+.courier .mascot { animation: courier-up var(--ms, 2s) var(--ease) both; }
+@keyframes courier-up { 0% { transform: translateY(54px); } 15% { transform: translateY(-3px); } 21%, 84% { transform: translateY(0); } 100% { transform: translateY(54px); } }
+.courier .paw { animation: courier-paw var(--ms, 2s) both; }
+@keyframes courier-paw { 0%, 9% { opacity: 0; transform: translateY(6px) scale(.5); } 19%, 84% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(6px) scale(.5); } }
+
+@media (max-width: 620px) {
+  .pal { --w: 52px; --show: 46px; right: 66px; }
+  .pal[data-pose="tall"] { --show: 56px; }
+  .pal.dozing { --show: 41px; }
+  .dam { display: none; }
+  .buddy-bubble { max-width: 190px; }
+}
+
+/* Sitting in a corner, what it says goes beside it, toward the middle of the page, so the header or the bar never cuts it off. */
+.pal[data-pose="sit"] .buddy-bubble { bottom: auto; top: 26%; right: calc(100% + 8px); left: auto; max-width: min(240px, 46vw); border-radius: 14px 4px 14px 14px; transform-origin: top right; z-index: 30; }
+.pal[data-pose="sit"][data-side="left"] .buddy-bubble { right: auto; left: calc(100% + 8px); border-radius: 4px 14px 14px 14px; transform-origin: top left; }
+
+/* Out of the bar there is nothing to hide behind, so nothing is cut: the arms, ears and tail can swing past its box.
+   The clip is only for peeking over the question bar. */
+.pal[data-pose="sit"] .buddy-clip, .pal[data-pose="held"] .buddy-clip { overflow: visible; }
+.pal[data-pose="sit"] .mascot, .pal[data-pose="held"] .mascot, .pal .logo { overflow: visible; }
+/* No box while it is grabbed with a mouse or a finger: no text selection, no drag ghost, no focus ring from the press.
+   The ring still shows for keyboard focus. */
+.pal, .pal * { -webkit-user-select: none; user-select: none; -webkit-user-drag: none; }
+.buddy-btn { outline: none; }
+.buddy-btn:focus-visible { outline: 2.5px solid var(--orange-deep); outline-offset: 5px; }
+.pal[data-pose="held"] .buddy-btn, .pal.grabbed .buddy-btn { outline: none !important; }

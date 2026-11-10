@@ -1,0 +1,3 @@
+# Optional: meaning-based search (assistant/semantic.py). A small embedding model that runs on this computer.
+# pip install -r requirements-search.txt, then: python -m assistant.semantic build
+fastembed>=0.4

@@ -1,0 +1,43 @@
+# Render blueprint for the Beaver Bot site (docs/deploy.md). No secret and no data is written here:
+# every "sync: false" value is typed into Render's dashboard by the owner.
+services:
+  - type: web
+    name: beaver-bot
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements-host.txt && python -m deploy.hostdata fetch
+    startCommand: python -m beaverbot --no-demo-build --no-open
+    healthCheckPath: /healthz
+    autoDeployTrigger: "off"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+      # Where the private data archive is, and how to check it arrived whole (python -m deploy.hostdata pack).
+      - key: DATA_URL
+        sync: false
+      - key: DATA_SHA256
+        sync: false
+      - key: DATA_TOKEN
+        sync: false
+      # The model. Without the key the site still runs, on its offline answers.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ASSISTANT_PROVIDER
+        value: anthropic
+      - key: ASSISTANT_ALLOW_PAID_CALLS
+        value: "yes"
+      - key: ASSISTANT_MODEL
+        value: claude-haiku-5-5
+      # Cost safety (beaverbot/budget.py, beaverbot/config.py).
+      - key: BEAVERBOT_DAILY_BUDGET_USD
+        value: "1"
+      - key: BEAVERBOT_ASK_LIMITS
+        value: 20/600,6/30
+      - key: BEAVERBOT_LIVE_SEARCH
+        value: "off"
+      # Render puts a proxy in front of the site. See "Check the visitor count" in docs/deploy.md.
+      - key: BEAVERBOT_PROXY_HOPS
+        value: "1"
+      - key: BEAVERBOT_LOW_MEMORY
+        value: "1"

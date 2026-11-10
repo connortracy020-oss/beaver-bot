@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Beaver Bot</title>
+<meta name="description" content="Beaver Bot answers campus questions from Oregon State University's public pages and links to the source. An independent student project, not affiliated with OSU.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAF4E8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#211F1D" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/mascot.css">
+<link rel="stylesheet" href="/static/css/chat.css">
+<link rel="stylesheet" href="/static/css/pages.css">
+<link rel="stylesheet" href="/static/css/demo.css">
+<link rel="stylesheet" href="/static/css/hub.css">
+<link rel="stylesheet" href="/static/css/buddy.css">
+<link rel="stylesheet" href="/static/css/look.css">
+<script src="/static/js/boot.js"></script>
+<script type="module" src="/static/js/app.js"></script>
+</head>
+<body>
+<a class="skip" href="#q" data-i18n="skip">Skip to the question box</a>
+
+<div class="app" id="app">
+  <header class="top" id="top">
+    <div class="top-in">
+      <a class="brand" id="brand" href="/" data-link aria-label="Beaver Bot, home">
+        <span class="brand-logo" id="brandLogo"></span>
+        <span class="brand-name">Beaver Bot</span>
+      </a>
+      <nav class="nav" id="nav" aria-label="Main">
+        <a href="/" data-link data-nav="ask" data-i18n="nav.ask">Ask</a>
+        <a href="/topics" data-link data-nav="topics" data-i18n="nav.topics">Topics</a>
+        <a href="/deadlines" data-link data-nav="deadlines" data-i18n="nav.deadlines">Deadlines</a>
+        <a href="/offices" data-link data-nav="offices" data-i18n="nav.offices">Offices</a>
+        <a href="/saved" data-link data-nav="saved" data-i18n="nav.saved">Saved</a>
+        <a href="/about" data-link data-nav="about" data-i18n="nav.about">About</a>
+      </nav>
+      <div class="top-tools">
+        <button class="icon-btn" id="newChat" type="button" hidden></button>
+        <button class="icon-btn lang-btn" id="langBtn" type="button"></button>
+        <button class="icon-btn" id="themeBtn" type="button"></button>
+        <button class="icon-btn" id="settingsBtn" type="button" aria-haspopup="dialog"></button>
+        <button class="btn small quiet" id="signInBtn" type="button" hidden></button>
+        <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-haspopup="dialog"></button>
+      </div>
+    </div>
+    <div class="demo-bar" id="demoBar" hidden></div>
+  </header>
+
+  <main class="main" id="main" tabindex="-1">
+    <section class="view view-chat" id="view-ask" aria-label="Ask Beaver Bot">
+      <div class="feed" id="feed" tabindex="0" role="region" aria-label="Conversation">
+        <div class="column" id="thread"></div>
+      </div>
+      <div class="dock" id="dock">
+        <div class="dock-in">
+          <p class="private-hint" id="privateHint" role="status" hidden></p>
+          <form class="ask" id="ask" autocomplete="off">
+            <div class="ask-row">
+              <button class="topics-btn" id="topicsBtn" type="button" aria-expanded="false" aria-controls="topicsMenu"></button>
+              <input id="q" type="text" inputmode="text" enterkeyhint="send" maxlength="400" autocapitalize="sentences" spellcheck="true"
+                     role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest">
+              <button class="go" id="go" type="submit"></button>
+            </div>
+            <ul class="suggest" id="suggest" role="listbox" hidden></ul>
+          </form>
+          <div class="menu" id="topicsMenu" hidden></div>
+          <p class="fine" id="fine"></p>
+        </div>
+      </div>
+    </section>
+    <section class="view view-page" id="view-page" hidden></section>
+  </main>
+</div>
+
+<div class="sr-only" id="announce" role="status" aria-live="polite"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<noscript><p class="noscript">Beaver Bot needs JavaScript to run. It is an independent student project, not affiliated with Oregon State University.</p></noscript>
+</body>
+</html>

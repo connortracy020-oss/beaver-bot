@@ -1,0 +1,594 @@
+<title>Beaver Bot</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a one-screen chat. The conversation fills the space and the question bar stays at the bottom. */
+:root {
+  --bg: #FAF4E8; --surface: #FFFBF3; --ink: #2B2A28; --muted: #6D665C;
+  --orange: #E08A4F; --orange-soft: #F6DFC8; --line: #E6DCCB; --on-orange: #2B2A28; --shade: rgba(43,42,40,.28);
+  --text: "Times New Roman", Times, serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #211F1D; --surface: #2C2A27; --ink: #F6EEDF; --muted: #B7AD9D;
+    --orange: #E8975F; --orange-soft: #4A3526; --line: #423E38; --on-orange: #241F1A; --shade: rgba(0,0,0,.55); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #211F1D; --surface: #2C2A27; --ink: #F6EEDF; --muted: #B7AD9D;
+  --orange: #E8975F; --orange-soft: #4A3526; --line: #423E38; --on-orange: #241F1A; --shade: rgba(0,0,0,.55); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 18px/1.5 var(--text); }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--orange); }
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+h1, h2, h3, p, ul, ol { margin: 0; }
+
+.app { height: 100%; display: flex; flex-direction: column; }
+.wide { width: 100%; max-width: 780px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* top bar */
+.top { flex: none; border-bottom: 1px solid var(--line); }
+.top .wide { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 8px; }
+.brand { display: flex; align-items: center; gap: 9px; background: none; border: 0; padding: 2px; border-radius: 10px; font-size: 1.2rem; }
+.brand .logo { width: 32px; height: 32px; }
+.top-right { display: flex; align-items: center; gap: 8px; }
+.ghost { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 3px 13px; font-size: .9rem; white-space: nowrap; transition: background .15s, border-color .15s; }
+.brand { white-space: nowrap; }
+@media (max-width: 480px) { .brand-name { display: none; } }
+.ghost:hover { background: var(--orange-soft); border-color: var(--orange); }
+.ghost[aria-pressed="true"] { background: var(--orange); border-color: var(--orange); color: var(--on-orange); }
+
+/* logo */
+.logo { display: block; overflow: visible; }
+.logo .eye, .logo .ant, .logo .whole { transform-box: fill-box; transform-origin: center; }
+.logo .ant { transform-origin: bottom center; }
+.logo.blink .eye { animation: blink .22s ease; }
+.logo.ping .ant { animation: twitch .3s ease; }
+.logo.boing .whole { animation: boing .55s cubic-bezier(.3,1.5,.5,1); }
+.logo.thinking .ant { animation: twitch .7s ease-in-out infinite; }
+.logo.thinking .trace { stroke-dasharray: 10 8; animation: flow .6s linear infinite; }
+.logo.thinking .pad { animation: pad 1s ease-in-out infinite; }
+.logo.thinking .pad:nth-of-type(2) { animation-delay: .2s; }
+.logo.thinking .pad:nth-of-type(3) { animation-delay: .4s; }
+@keyframes blink { 50% { transform: scaleY(.08); } }
+@keyframes twitch { 25% { transform: rotate(-11deg); } 75% { transform: rotate(11deg); } }
+@keyframes boing { 40% { transform: scale(1.09,.93); } 70% { transform: scale(.97,1.04); } }
+@keyframes flow { to { stroke-dashoffset: -18; } }
+@keyframes pad { 50% { fill: #FFF3E2; } }
+
+/* conversation */
+.feed { flex: 1; min-height: 0; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
+.column { flex: none; margin-block: auto; padding-block: 20px; display: flex; flex-direction: column; gap: 28px; }
+.chatting .column { margin-block: 0; }
+
+.welcome { display: grid; grid-template-columns: 148px minmax(0,1fr); gap: 28px; align-items: center; }
+.mascot { position: relative; background: none; border: 0; padding: 0; width: 148px; border-radius: 34px; }
+.mascot .logo { width: 100%; height: auto; }
+.bubble { position: absolute; left: 68%; top: -16px; z-index: 2; width: max-content; max-width: 170px; background: var(--ink); color: var(--bg); font-size: .9rem; line-height: 1.25; padding: 6px 10px; border-radius: 12px 12px 12px 3px; opacity: 0; transform: translateY(5px); transition: opacity .18s, transform .18s; pointer-events: none; }
+.bubble.on { opacity: 1; transform: none; }
+h1.hello { font: 400 clamp(2rem, 5vw, 3rem)/1.1 var(--text); text-wrap: balance; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.welcome .chips { margin-top: 14px; }
+.chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 13px; font-size: .98rem; text-align: left; transition: background .15s, border-color .15s, transform .12s; }
+.chip:hover { background: var(--orange-soft); border-color: var(--orange); transform: translateY(-1px); }
+.chip.live { background: var(--orange); border-color: var(--orange); color: var(--on-orange); }
+
+.turn { display: flex; flex-direction: column; gap: 12px; }
+h2.question { align-self: flex-end; max-width: min(82%, 32em); background: var(--orange); color: var(--on-orange); font: 400 1.05rem/1.35 var(--text); padding: 8px 16px; border-radius: 21px 21px 5px 21px; overflow-wrap: anywhere; transform-origin: bottom right; animation: pop .22s ease both; }
+@keyframes pop { from { opacity: 0; transform: scale(.92) translateY(6px); } }
+.reply { display: grid; grid-template-columns: 38px minmax(0,1fr); gap: 12px; }
+.reply .logo { width: 38px; height: 38px; }
+.steps { list-style: none; width: fit-content; max-width: 100%; padding: 7px 15px; background: var(--surface); border: 1px solid var(--line); border-radius: 19px 19px 19px 5px; color: var(--muted); transform-origin: bottom left; animation: pop .22s ease both; }
+.steps li { display: flex; align-items: center; gap: 10px; }
+.steps li:not(:last-child) { display: none; }
+.dots { display: inline-flex; gap: 4px; flex: none; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); animation: dot 1s ease-in-out infinite; }
+.dots i:nth-child(2) { animation-delay: .15s; }
+.dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 0%, 60%, 100% { transform: none; opacity: .45; } 30% { transform: translateY(-5px); opacity: 1; } }
+@keyframes rise { from { opacity: 0; transform: translateY(5px); } }
+
+.out { max-width: 65ch; }
+.out p, .out ol, .out ul, .out h3 { margin-top: 10px; }
+.out > :first-child { margin-top: 0; }
+.out p.lead { font-size: 1em; }
+.out h3 { font: 700 1.08rem/1.3 var(--text); margin-top: 18px; }
+.out ol, .out ul { padding-left: 22px; }
+.out li { margin-top: 5px; }
+.out li::marker { color: var(--orange); font-weight: 700; }
+.out .chips { margin-top: 14px; }
+.w { animation: word .24s ease both; }
+@keyframes word { from { opacity: 0; } }
+.cite { display: inline-grid; place-items: center; min-width: 19px; height: 19px; padding: 0 4px; border: 0; border-radius: 6px; background: var(--orange-soft); font-size: .76rem; font-weight: 700; line-height: 1; vertical-align: 2px; transition: background .14s; }
+.cite:hover { background: var(--orange); color: var(--on-orange); }
+
+.extras { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+.actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.reveal { animation: rise .35s ease both; }
+.mini { font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+.sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+.source { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; text-decoration: none; line-height: 1.3; transition: border-color .14s, transform .14s, box-shadow .3s; }
+.source:hover { border-color: var(--orange); transform: translateY(-2px); }
+.source.flash { box-shadow: 0 0 0 4px var(--orange); }
+.source strong { display: block; }
+.source q { display: block; font-size: .95rem; margin-top: 5px; }
+.source small { display: block; color: var(--muted); margin-top: 5px; font-size: .84rem; }
+
+
+/* question bar */
+.dock { flex: none; border-top: 1px solid var(--line); background: var(--bg); }
+.dock .wide { padding-block: 10px 6px; position: relative; }
+.ask { position: relative; }
+.ask-row { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px; padding: 5px; transition: border-color .15s, box-shadow .15s; }
+.ask-row:focus-within { border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-soft); }
+.ask input { flex: 1; min-width: 0; border: 0; background: none; outline: 0; font-size: 1.08rem; padding: 6px 4px; }
+.ask input::placeholder { color: var(--muted); }
+.topics-btn { flex: none; background: none; border: 0; border-radius: 999px; padding: 6px 12px; transition: background .15s; }
+.topics-btn:hover, .topics-btn[aria-expanded="true"] { background: var(--orange-soft); }
+.go { flex: none; background: var(--orange); color: var(--on-orange); border: 0; border-radius: 999px; padding: 6px 18px; font-weight: 700; transition: transform .12s, filter .12s; }
+.go:hover { filter: brightness(1.06); }
+.go:active { transform: scale(.96); }
+.fine { color: var(--muted); font-size: .8rem; line-height: 1.3; text-align: center; margin-top: 5px; }
+
+.suggest, .menu { position: absolute; z-index: 20; bottom: calc(100% + 6px); background: var(--surface); border: 1px solid var(--line); border-radius: 13px; box-shadow: 0 10px 28px var(--shade); }
+.suggest { left: 0; right: 0; padding: 5px; list-style: none; }
+.suggest li { padding: 6px 11px; border-radius: 8px; cursor: pointer; }
+.suggest li.on, .suggest li:hover { background: var(--orange-soft); }
+.menu { left: 0; width: min(430px, 100%); max-height: min(62vh, 470px); overflow-y: auto; padding: 5px; }
+.rowbtn { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; background: none; border: 0; border-radius: 8px; padding: 5px 10px; text-align: left; }
+.rowbtn:hover, .rowbtn[aria-expanded="true"] { background: var(--orange-soft); }
+.rowbtn::after { content: "+"; color: var(--muted); }
+.rowbtn[aria-expanded="true"]::after { content: "\2212"; }
+.rowbody { display: flex; flex-direction: column; gap: 1px; padding: 4px 6px 8px 14px; }
+.rowbody button { background: none; border: 0; padding: 3px 4px; border-radius: 6px; text-align: left; display: flex; justify-content: space-between; gap: 8px; }
+.rowbody button:hover { color: var(--orange); }
+.rowbody .office { font-size: .92rem; color: var(--muted); padding: 2px 4px; }
+.badge { flex: none; background: var(--orange); color: var(--on-orange); font-size: .76rem; border-radius: 999px; padding: 0 8px; align-self: center; }
+
+.toast { position: fixed; z-index: 40; left: 50%; bottom: calc(112px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 12px); max-width: calc(100% - 32px); width: max-content; background: var(--ink); color: var(--bg); padding: 6px 15px; border-radius: 11px; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 620px) {
+  .welcome { grid-template-columns: minmax(0,1fr); gap: 14px; }
+  .mascot { width: 104px; border-radius: 24px; }
+  .bubble { left: 110%; top: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="wide">
+      <button class="brand" id="brand" type="button" aria-label="Beaver Bot, start over"><span data-logo="brandlogo"></span><span class="brand-name">Beaver Bot</span></button>
+      <div class="top-right">
+        <button class="ghost" id="newchat" type="button" hidden>New chat</button>
+        <button class="ghost" id="theme" type="button">Dark mode</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="feed" id="feed">
+    <div class="wide column" id="thread">
+      <section class="welcome" id="welcome">
+        <button class="mascot" id="mascot" type="button" aria-label="Say hi to Beaver Bot">
+          <span data-logo="herologo"></span>
+          <span class="bubble" id="bubble" aria-live="polite"></span>
+        </button>
+        <div>
+          <h1 class="hello">Hi, I'm Beaver Bot. What do you need help with?</h1>
+          <div class="chips" id="popular"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="dock">
+    <div class="wide">
+      <form class="ask" id="ask" autocomplete="off">
+        <div class="ask-row">
+          <button class="topics-btn" id="topicsBtn" type="button" aria-expanded="false" aria-controls="menu">Topics</button>
+          <input id="q" type="text" aria-label="Ask anything about campus" placeholder="Ask anything about campus">
+          <button class="go" type="submit">Ask</button>
+        </div>
+        <ul class="suggest" id="suggest" hidden></ul>
+      </form>
+      <div class="menu" id="menu" hidden></div>
+      <p class="fine">Independent student project, not affiliated with Oregon State University. Confirm details on the official pages.</p>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const PLAN_Q = "How do I set up a payment plan?";
+const TOPICS = [
+  { name:"Getting in: admissions, transfer & international",
+    qs:["How do I apply as a transfer student?","Will my credits transfer to OSU?","Where do international students get help?"],
+    links:[["Office of Admissions","https://admissions.oregonstate.edu/contact-information"],["Transfer Students","https://transfer.oregonstate.edu/contact-us"]] },
+  { name:"Registration & classes",
+    qs:["How do I drop a class?","When can I register?","How do I change a class to S/U grading?"],
+    links:[["Office of the Registrar","https://registrar.oregonstate.edu/contact-us"]] },
+  { name:"Dates & deadlines",
+    qs:["When is the last day to add a class?","When does winter term start?","When are finals?"],
+    links:[["Academic Calendar","https://registrar.oregonstate.edu/osu-academic-calendar"]] },
+  { name:"Courses & degree requirements",
+    qs:["What classes do I still need?","What counts for Core Education?","How do I add a minor?"],
+    links:[["Office of the Registrar","https://registrar.oregonstate.edu/contact-us"]] },
+  { name:"Paying for college",
+    qs:[PLAN_Q,"When is tuition due?","How do I apply for scholarships?"],
+    links:[["Office of Financial Aid","https://financialaid.oregonstate.edu/contact-us"],["Student Accounts","https://finance.oregonstate.edu/student-accounts"]] },
+  { name:"Housing, dining & campus life",
+    qs:["How do I apply for housing?","What meal plans are there?","How do I get a parking permit?"],
+    links:[["Housing & Dining Services","https://uhds.oregonstate.edu/contact-uhds"],["Transportation Services","https://transportation.oregonstate.edu/contact-us"]] },
+  { name:"Health, counseling & crisis",
+    qs:["How do I see a counselor?","Where is Student Health Services?","Who can I talk to right now?"],
+    links:[["Counseling & Psychological Services (24/7: 541-737-2131)","https://counseling.oregonstate.edu/hours-location"],["Student Health Services","https://studenthealth.oregonstate.edu/locations"]] },
+  { name:"Accessibility",
+    qs:["How do I request accommodations?","Where can I take an accommodated exam?"],
+    links:[["Disability Access Services","https://ds.oregonstate.edu/hours-and-contact-information"]] },
+  { name:"Support, success & careers",
+    qs:["Where can I get tutoring?","How do I meet with my advisor?","Who can help with my resume?"],
+    links:[["Academic Advising","https://advising.oregonstate.edu/"],["Academic Success Center","https://success.oregonstate.edu/"]] },
+  { name:"Rights, conduct & policies",
+    qs:["What is the academic misconduct process?","Who can I talk to about a problem with a class?"],
+    links:[["Student Community Standards","https://scs.oregonstate.edu/contact-us"],["Dean of Students","https://studentlife.oregonstate.edu/about-us"]] },
+  { name:"Technology help",
+    qs:["How do I reset my ONID password?","How do I set up Duo?"],
+    links:[["UIT Service Desk","https://technology.oregonstate.edu/help"]] },
+  { name:"Online (Ecampus) students",
+    qs:["How do Ecampus exams work?","Who is my Ecampus advisor?"],
+    links:[["Oregon State Ecampus","https://ecampus.oregonstate.edu/contact/"]] }
+];
+const POPULAR = [PLAN_Q, "How do I drop a class?", "When is tuition due?", "Where can I get tutoring?"];
+const FOLLOWUPS = ["When is tuition due?", "What happens if I miss a payment?", "How do I apply for scholarships?"];
+const ALL_QS = [...new Set(TOPICS.flatMap(t => t.qs).concat(POPULAR))];
+const BUBBLES = ["Beep. Ask me something.", "These teeth are for chewing through OSU websites.", "I read the official pages so you don't have to.", "Try the payment plan question!", "Hey, that tickles."];
+
+const $ = s => document.querySelector(s);
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const feed = $("#feed"), thread = $("#thread"), input = $("#q");
+
+/* Logo: built per instance so each one can look at the pointer */
+let logoCount = 0;
+function logoSVG(id) {
+  const D = "#2B2A28", O = "#E08A4F", clip = "clip" + (++logoCount);
+  const head = "M256 112C352 112 438 170 444 276C450 378 358 438 256 438C154 438 62 378 68 276C74 170 160 112 256 112Z";
+  return `<svg class="logo"${id ? ` id="${id}"` : ""} viewBox="0 0 512 512" role="img" aria-label="Beaver Bot logo">
+  <rect width="512" height="512" rx="112" fill="${D}"/>
+  <g class="whole">
+    <g class="ant"><path d="M256 124V82" stroke="${O}" stroke-width="14" stroke-linecap="round"/><circle cx="256" cy="66" r="19" fill="${O}"/></g>
+    <circle cx="92" cy="172" r="32" fill="${O}"/><circle cx="86" cy="166" r="16" fill="#A85E2F"/>
+    <circle cx="420" cy="172" r="32" fill="${O}"/><circle cx="426" cy="166" r="16" fill="#A85E2F"/>
+    <path d="${head}" fill="${O}"/>
+    <g class="eye"><g class="look"><circle cx="176" cy="240" r="24" fill="${D}"/><circle cx="184" cy="231" r="8" fill="#FFFDF8"/></g></g>
+    <g class="eye"><g class="look"><circle cx="336" cy="240" r="24" fill="${D}"/><circle cx="344" cy="231" r="8" fill="#FFFDF8"/></g></g>
+    <ellipse cx="256" cy="326" rx="108" ry="74" fill="#F5C8A3"/>
+    <path d="M224 335Q241 338 256 324Q271 338 288 335V382Q288 394 276 394H236Q224 394 224 382Z" fill="#FFFDF8" stroke="${D}" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M256 330V394" stroke="${D}" stroke-width="7"/>
+    <path d="M192 318Q226 348 256 324Q286 348 320 318" stroke="${D}" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M256 296V324" stroke="${D}" stroke-width="11" stroke-linecap="round"/>
+    <path d="M222 272Q256 256 290 272Q295 292 268 306Q256 312 244 306Q217 292 222 272Z" fill="${D}"/>
+    <clipPath id="${clip}"><path d="${head}"/></clipPath>
+    <g clip-path="url(#${clip})" stroke="${D}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path class="trace" d="M452 256H412L394 238"/><path class="trace" d="M452 280H400"/><path class="trace" d="M452 304H412L394 322"/>
+      <circle class="pad" cx="387" cy="231" r="9" fill="${O}"/><circle class="pad" cx="391" cy="280" r="9" fill="${O}"/><circle class="pad" cx="387" cy="329" r="9" fill="${O}"/>
+    </g>
+  </g></svg>`;
+}
+document.querySelectorAll("[data-logo]").forEach(el => { el.innerHTML = logoSVG(el.dataset.logo); });
+const logos = () => document.querySelectorAll(".logo");
+function replay(el, cls, ms) { if (!el) return; el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); setTimeout(() => el.classList.remove(cls), ms); }
+function face() { return [...feed.querySelectorAll(".logo")].filter(l => l.getBoundingClientRect().width).pop(); }
+
+let px = 0, py = 0, queued = false;
+function aim() {
+  queued = false;
+  logos().forEach(svg => {
+    const r = svg.getBoundingClientRect();
+    if (!r.width) return;
+    const dx = px - (r.left + r.width / 2), dy = py - (r.top + r.height * .47);
+    const d = Math.hypot(dx, dy) || 1, reach = Math.min(1, d / 220) * 9;
+    svg.querySelectorAll(".look").forEach(g => g.setAttribute("transform", `translate(${(dx / d * reach).toFixed(1)} ${(dy / d * reach).toFixed(1)})`));
+  });
+}
+addEventListener("pointermove", e => { px = e.clientX; py = e.clientY; if (!queued && !still) { queued = true; requestAnimationFrame(aim); } });
+if (!still) setInterval(() => logos().forEach(l => replay(l, "blink", 240)), 3800);
+
+let bubbleIndex = 0, bubbleTimer;
+$("#mascot").addEventListener("click", () => {
+  replay($("#herologo"), "boing", 560); replay($("#herologo"), "ping", 320);
+  const b = $("#bubble"); b.textContent = BUBBLES[bubbleIndex++ % BUBBLES.length]; b.classList.add("on");
+  clearTimeout(bubbleTimer); bubbleTimer = setTimeout(() => b.classList.remove("on"), 2600);
+});
+
+function questionChip(q, label) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip" + (q === PLAN_Q ? " live" : ""); b.textContent = label || q;
+  b.addEventListener("click", () => ask(q));
+  return b;
+}
+POPULAR.forEach(q => $("#popular").append(questionChip(q)));
+
+/* Topics menu */
+const menu = $("#menu"), topicsBtn = $("#topicsBtn");
+TOPICS.forEach(t => {
+  const row = document.createElement("div"), btn = document.createElement("button"), body = document.createElement("div");
+  btn.type = "button"; btn.className = "rowbtn"; btn.textContent = t.name; btn.setAttribute("aria-expanded", "false");
+  body.className = "rowbody"; body.hidden = true;
+  t.qs.forEach(q => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.innerHTML = `<span>${esc(q)}</span>` + (q === PLAN_Q ? `<span class="badge">Try this</span>` : "");
+    b.addEventListener("click", () => ask(q, t));
+    body.append(b);
+  });
+  t.links.forEach(([label, href]) => {
+    const a = document.createElement("a");
+    a.className = "office"; a.href = href; a.target = "_blank"; a.rel = "noopener"; a.textContent = label;
+    body.append(a);
+  });
+  btn.addEventListener("click", () => {
+    const open = body.hidden;
+    menu.querySelectorAll(".rowbody").forEach(b => { b.hidden = true; });
+    menu.querySelectorAll(".rowbtn").forEach(b => b.setAttribute("aria-expanded", "false"));
+    body.hidden = !open; btn.setAttribute("aria-expanded", open);
+  });
+  row.append(btn, body); menu.append(row);
+});
+function showMenu(on) { menu.hidden = !on; topicsBtn.setAttribute("aria-expanded", on); if (on) hideSuggest(); }
+topicsBtn.addEventListener("click", () => showMenu(menu.hidden));
+addEventListener("pointerdown", e => { if (!menu.hidden && !menu.contains(e.target) && !topicsBtn.contains(e.target)) showMenu(false); });
+
+/* Question bar with live suggestions */
+const list = $("#suggest");
+let items = [], activeItem = -1;
+function hideSuggest() { list.hidden = true; activeItem = -1; }
+const paint = () => [...list.children].forEach((li, i) => li.classList.toggle("on", i === activeItem));
+input.addEventListener("input", () => {
+  replay(face(), "ping", 320);
+  const text = input.value.trim().toLowerCase();
+  items = text ? ALL_QS.filter(q => q.toLowerCase().includes(text)).slice(0, 5) : [];
+  activeItem = -1;
+  list.replaceChildren(...items.map(q => {
+    const li = document.createElement("li");
+    li.textContent = q;
+    li.addEventListener("pointerdown", e => { e.preventDefault(); hideSuggest(); ask(q); });
+    return li;
+  }));
+  list.hidden = !items.length;
+});
+input.addEventListener("keydown", e => {
+  if (e.key === "Escape") return hideSuggest();
+  if (list.hidden || !items.length) return;
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    activeItem = e.key === "ArrowDown" ? (activeItem + 1) % items.length : (activeItem <= 0 ? items.length - 1 : activeItem - 1);
+    paint();
+  }
+});
+input.addEventListener("blur", hideSuggest);
+$("#ask").addEventListener("submit", e => {
+  e.preventDefault();
+  const q = activeItem >= 0 ? items[activeItem] : input.value.trim();
+  hideSuggest();
+  if (q) ask(q); else input.focus();
+});
+
+const prompts = ["Ask anything about campus", PLAN_Q, "When is the last day to add a class?", "Where can I get tutoring?"];
+let promptIndex = 0;
+if (!still) setInterval(() => {
+  if (!input.value && document.activeElement !== input && !document.body.classList.contains("chatting")) input.placeholder = prompts[++promptIndex % prompts.length];
+}, 2800);
+
+/* Answers */
+const cite = n => `<button class="cite" type="button" data-s="${n}" aria-label="Source ${n}">${n}</button>`;
+const PLAN_HTML = `
+<p class="lead">You set up a payment plan online in <a href="https://mybill.oregonstate.edu" target="_blank" rel="noopener">myBill</a>, the university's billing site. ${cite(1)}</p>
+<ol>
+  <li>Go to myBill and choose "Login with ONID." You'll sign in on OSU's own page.</li>
+  <li>Open the "Payment Plans" tab at the top of the screen.</li>
+  <li>Select "Current/ATD term" from the dropdown.</li>
+  <li>Pick the plan option that works best for you. ${cite(1)}</li>
+</ol>
+<h3>Good to know</h3>
+<ul>
+  <li>Enrolling in a plan costs $15. ${cite(1)}</li>
+  <li>If you stay current on payments, you can register for future terms even if your balance is over the registration limit. ${cite(1)}</li>
+  <li>A current-term plan also exempts you from that term's late fee. Without a plan, an unpaid balance over $500 can bring an $85 late fee once per term. ${cite(2)}</li>
+</ul>`;
+const EXTRAS_HTML = `
+  <div class="actions">
+    <button class="ghost" data-do="up" type="button" aria-pressed="false">Helpful</button>
+    <button class="ghost" data-do="down" type="button" aria-pressed="false">Not helpful</button>
+    <button class="ghost" data-do="copy" type="button">Copy answer</button>
+    <button class="ghost" data-do="again" type="button">Replay</button>
+  </div>
+  <div>
+    <div class="mini">Official sources</div>
+    <div class="sources">
+      <a class="source" data-card="1" href="https://finance.oregonstate.edu/student-accounts/payment-plans" target="_blank" rel="noopener">
+        <strong>1. Payment Plans</strong>
+        <q>Payment plans are subject to a $15.00 plan enrollment fee.</q>
+        <small>Student Accounts · checked Oct 22, 2026</small>
+      </a>
+      <a class="source" data-card="2" href="https://catalog.oregonstate.edu/tuition-fees-payment/" target="_blank" rel="noopener">
+        <strong>2. Tuition, Fees &amp; Payment</strong>
+        <q>a $85.00 student account late fee would be charged once per term</q>
+        <small>Academic Catalog · checked Oct 22, 2026</small>
+      </a>
+      <a class="source" href="https://finance.oregonstate.edu/student-accounts" target="_blank" rel="noopener">
+        <strong>Need a person?</strong>
+        <small>Contact Student Accounts</small>
+      </a>
+    </div>
+  </div>
+  <div>
+    <div class="mini">Ask next</div>
+    <div class="chips" data-next></div>
+  </div>`;
+
+const isPlan = q => /payment.?plan|installment|plan.*(tuition|bill)|pay.*(tuition|bill).*(month|over time|parts)/i.test(q);
+function wrapWords(root, stepMs) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.trim()) nodes.push(walker.currentNode);
+  let i = 0;
+  nodes.forEach(node => {
+    const frag = document.createDocumentFragment();
+    node.nodeValue.split(/(\s+)/).forEach(part => {
+      if (!part) return;
+      if (!part.trim()) return frag.append(part);
+      const s = document.createElement("span");
+      s.className = "w"; s.style.animationDelay = (i++ * stepMs) + "ms"; s.textContent = part;
+      frag.append(s);
+    });
+    node.replaceWith(frag);
+  });
+  return i * stepMs;
+}
+let activeTurn = null;
+function makeTurn(q, topic) {
+  const el = document.createElement("article");
+  el.className = "turn";
+  el.innerHTML = `<h2 class="question">${esc(q)}</h2>
+    <div class="reply">${logoSVG()}<div>
+      <ul class="steps"></ul><div class="out"></div><div class="extras reveal" hidden></div>
+    </div></div>`;
+  const logo = el.querySelector(".logo"), steps = el.querySelector(".steps"), out = el.querySelector(".out"), extras = el.querySelector(".extras");
+  const plan = isPlan(q);
+  let timers = [], written = false, done = false;
+  const later = (fn, ms) => timers.push(setTimeout(fn, still ? 0 : ms));
+  const step = (text, ms) => later(() => {
+    [...steps.children].forEach(li => li.classList.add("done"));
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span>${esc(text)}</span>`;
+    steps.append(li);
+  }, ms);
+
+  function write(instant) {
+    written = true; steps.hidden = true;
+    if (plan) out.innerHTML = PLAN_HTML;
+    else {
+      const links = topic ? topic.links : [];
+      out.innerHTML = `<p class="lead">In this demo I only know one answer. The full version would answer this from OSU's official pages, with links.</p>
+        ${links.length ? `<p>For now, the right place to ask is ${links.map(([l, h]) => `<a href="${h}" target="_blank" rel="noopener">${esc(l)}</a>`).join(" or ")}.</p>` : ""}`;
+    }
+    const total = (instant || still) ? 0 : wrapWords(out, plan ? 24 : 22);
+    if (instant) finish(); else later(finish, total + 300);
+  }
+  function finish() {
+    if (done) return;
+    done = true;
+    logo.classList.remove("thinking");
+    out.querySelectorAll(".w").forEach(s => { s.style.animationDelay = "0ms"; });
+    if (!plan) {
+      const c = document.createElement("div"), back = document.createElement("button");
+      c.className = "chips reveal"; back.type = "button"; back.className = "chip"; back.textContent = "Browse topics";
+      back.addEventListener("click", () => showMenu(true));
+      c.append(questionChip(PLAN_Q, "Try: " + PLAN_Q), back);
+      out.append(c);
+      return;
+    }
+    extras.innerHTML = EXTRAS_HTML;
+    extras.hidden = false;
+    FOLLOWUPS.forEach(f => extras.querySelector("[data-next]").append(questionChip(f)));
+    replay(logo, "boing", 560);
+  }
+  const api = {
+    el, start() {
+      timers.forEach(clearTimeout); timers = []; written = false; done = false;
+      out.replaceChildren(); extras.replaceChildren(); extras.hidden = true; steps.replaceChildren(); steps.hidden = false;
+      logo.classList.add("thinking");
+      step("Reading your question", 0);
+      if (plan) { step("Searching about 7,500 OSU pages", 550); step("Found 2 official sources", 1200); later(() => write(false), 1750); }
+      else later(() => write(false), 700);
+    },
+    complete() {
+      if (done) return;
+      timers.forEach(clearTimeout); timers = [];
+      if (written) finish(); else write(true);
+    }
+  };
+  extras.addEventListener("click", e => {
+    const act = e.target.closest("[data-do]"); if (!act) return;
+    const kind = act.dataset.do;
+    if (kind === "up" || kind === "down") {
+      const other = extras.querySelector(`[data-do="${kind === "up" ? "down" : "up"}"]`), on = act.getAttribute("aria-pressed") !== "true";
+      act.setAttribute("aria-pressed", on); other.setAttribute("aria-pressed", "false");
+      if (on) toast("Thanks. This demo doesn't save ratings.");
+    } else if (kind === "copy") {
+      const text = out.innerText + "\n\nSource: https://finance.oregonstate.edu/student-accounts/payment-plans";
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => toast("Copied the answer"), () => toast("Copy isn't available here"));
+      else toast("Copy isn't available here");
+    } else if (kind === "again") {
+      if (activeTurn && activeTurn !== api) activeTurn.complete();
+      activeTurn = api; api.start();
+    }
+  });
+  out.addEventListener("click", e => {
+    const b = e.target.closest(".cite"); if (!b) return;
+    const card = extras.querySelector(`[data-card="${b.dataset.s}"]`); if (!card) return;
+    card.scrollIntoView({ block: "center", behavior: still ? "auto" : "smooth" });
+    replay(card, "flash", 1100);
+  });
+  return api;
+}
+
+function fitLastTurn() {
+  const turns = thread.querySelectorAll(".turn");
+  turns.forEach(t => { t.style.minHeight = ""; });
+  if (turns.length) turns[turns.length - 1].style.minHeight = (feed.clientHeight - 40) + "px";
+}
+addEventListener("resize", fitLastTurn);
+
+function ask(q, topic) {
+  showMenu(false);
+  if (activeTurn) activeTurn.complete();
+  document.body.classList.add("chatting");
+  $("#welcome").hidden = true; $("#newchat").hidden = false;
+  input.value = ""; input.placeholder = "Message Beaver Bot";
+  if (matchMedia("(pointer: coarse)").matches) input.blur();
+  const turn = makeTurn(q, topic);
+  thread.append(turn.el);
+  activeTurn = turn;
+  fitLastTurn();
+  feed.scrollTo({ top: turn.el.offsetTop - 12, behavior: still ? "auto" : "smooth" });
+  turn.start();
+}
+function newChat() {
+  if (activeTurn) activeTurn.complete();
+  activeTurn = null;
+  thread.querySelectorAll(".turn").forEach(t => t.remove());
+  document.body.classList.remove("chatting");
+  $("#welcome").hidden = false; $("#newchat").hidden = true;
+  input.placeholder = prompts[0];
+  feed.scrollTop = 0;
+}
+$("#newchat").addEventListener("click", newChat);
+$("#brand").addEventListener("click", () => { replay($("#brandlogo"), "boing", 560); newChat(); });
+
+function toast(text) { const t = $("#toast"); t.textContent = text; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2200); }
+
+/* Theme */
+const root = document.documentElement;
+function isDark() { return getComputedStyle(root).getPropertyValue("--bg").trim().toUpperCase() === "#211F1D"; }
+function labelTheme() { $("#theme").textContent = isDark() ? "Light mode" : "Dark mode"; }
+try { const saved = localStorage.getItem("bb-theme"); if (saved) root.dataset.theme = saved; } catch (e) {}
+labelTheme();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", labelTheme);
+$("#theme").addEventListener("click", () => {
+  root.dataset.theme = isDark() ? "light" : "dark";
+  labelTheme();
+  try { localStorage.setItem("bb-theme", root.dataset.theme); } catch (e) {}
+});
+
+addEventListener("keydown", e => { if (e.key === "Escape") showMenu(false); });
+</script>

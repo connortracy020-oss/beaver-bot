@@ -1,0 +1,23 @@
+# Crawled data stays private and local: raw HTML/PDFs, the SQLite DB, crawl logs.
+data/
+*.sqlite
+*.sqlite3
+*.db
+
+# Local config (holds the contact email used in the User-Agent).
+crawler.toml
+
+.venv/
+__pycache__/
+*.pyc
+
+# Local tooling
+.claude/
+
+# This computer's site settings (which answer provider to use). Never holds a key.
+beaverbot.local.toml
+
+# The search index, the data archive for the host, and a private form. None of these is ever committed.
+*.npy
+*.tar.gz
+Community Engagement - Filled.pdf
